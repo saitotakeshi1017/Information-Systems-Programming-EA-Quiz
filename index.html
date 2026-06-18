@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A1 Practice Quiz</title>
+<style>
+  :root {
+    --bg:        #F5EFE0;
+    --bg-soft:   #EDE4D0;
+    --card:      #FBF7EC;
+    --ink:       #2E3A3A;
+    --muted:     #6B7775;
+    --accent:    #5B8A8A;
+    --accent-d:  #406A6A;
+    --good:      #7BA77B;
+    --good-bg:   #DFEBDC;
+    --bad:       #B8746B;
+    --bad-bg:    #EFD9D3;
+    --hi:        #E8C97A;
+    --line:      #d8cfba;
+    --shadow:    0 2px 0 rgba(46,58,58,0.08), 0 6px 18px rgba(46,58,58,0.06);
+    --radius:    14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height:1.55; min-height:100vh; display:flex; justify-content:center;
+    padding:24px 14px 60px;
+  }
+  .wrap { width:100%; max-width:1180px; }
+  header { text-align:center; margin-bottom:18px; }
+  header h1 { font-size:1.45rem; margin:0 0 4px; color:var(--accent-d); letter-spacing:.3px; }
+  header p { margin:0; color:var(--muted); font-size:.9rem; }
+  .card { background:var(--card); border-radius:var(--radius); padding:24px 22px 20px; box-shadow:var(--shadow); }
+  .quiz-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:14px; flex-wrap:wrap; }
+  .qnum { font-size:.75rem; letter-spacing:1.2px; color:var(--accent); text-transform:uppercase; margin-bottom:6px; font-weight:600; }
+  .qtype-tag { display:inline-block; margin-left:8px; padding:2px 8px; border-radius:999px; background:var(--hi); color:#6b4f1a; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+  .page-title { margin:0; color:var(--accent-d); font-size:1.18rem; }
+  .small { color:var(--muted); font-size:.84rem; }
+  .score-pill { background:var(--bg-soft); border:1px solid var(--line); border-radius:999px; padding:7px 13px; color:var(--accent-d); font-weight:800; font-size:.9rem; }
+  .progress-track { width:100%; height:6px; background:var(--bg-soft); border-radius:999px; overflow:hidden; margin-bottom:16px; }
+  .progress-fill { height:100%; background:var(--accent); width:0%; transition:width .3s ease; }
+  .quiz-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; align-items:stretch; }
+  .question-card { background:#FFFDF6; border:1.5px solid var(--line); border-radius:12px; padding:13px 13px 14px; display:flex; flex-direction:column; min-height:190px; box-shadow:0 2px 0 rgba(46,58,58,0.04); }
+  .question-number { font-size:.72rem; letter-spacing:1px; color:var(--accent); text-transform:uppercase; font-weight:800; margin-bottom:8px; }
+  .qtext { font-size:.93rem; margin:0 0 10px; color:var(--ink); font-weight:700; line-height:1.38; }
+  .options { display:grid; gap:8px; margin-top:auto; }
+  .opt { text-align:left; background:#FFFDF6; border:1.5px solid var(--line); color:var(--ink); padding:9px 10px; border-radius:10px; font-size:.84rem; cursor:pointer; transition:all .15s ease; font-family:inherit; line-height:1.35; width:100%; display:flex; align-items:flex-start; white-space:normal; overflow:hidden; }
+  .opt:hover:not(:disabled) { border-color:var(--accent); background:#FFFEFA; transform:translateY(-1px); }
+  .opt:disabled { cursor:default; }
+  .opt.correct, .opt.reveal { background:var(--good-bg); border-color:var(--good); color:#2f4a2f; }
+  .opt.wrong { background:var(--bad-bg); border-color:var(--bad); color:#5a2c26; }
+  .marker { display:inline-block; width:22px; height:22px; line-height:22px; border-radius:50%; background:var(--bg-soft); color:var(--muted); text-align:center; font-size:.78rem; margin-right:9px; font-weight:700; flex:0 0 auto; }
+  .opt.correct .marker, .opt.reveal .marker { background:var(--good); color:white; }
+  .opt.wrong .marker { background:var(--bad); color:white; }
+  .optText { display:inline-block; min-width:0; }
+  .feedback { margin-top:10px; padding:9px 11px; border-radius:10px; font-size:.82rem; display:none; line-height:1.4; }
+  .feedback.good { background:var(--good-bg); color:#2f4a2f; display:block; }
+  .feedback.bad { background:var(--bad-bg); color:#5a2c26; display:block; }
+  .feedback.info { background:var(--bg-soft); color:var(--ink); display:block; }
+  .actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center; }
+  .submit-row { justify-content:space-between; align-items:center; }
+  .submit-note { color:var(--muted); font-size:.84rem; }
+  button.btn { background:var(--accent); color:#FBF7EC; border:none; padding:11px 18px; border-radius:10px; font-size:.96rem; font-weight:600; cursor:pointer; font-family:inherit; transition:background .15s ease, transform .1s ease; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; }
+  button.btn:hover { background:var(--accent-d); }
+  button.btn:active { transform:translateY(1px); }
+  button.btn.ghost { background:transparent; color:var(--accent-d); border:1.5px solid var(--accent); }
+  button.btn.ghost:hover { background:var(--bg-soft); }
+  .result { text-align:center; padding:12px 6px 6px; }
+  .score-big { font-size:2.2rem; font-weight:700; color:var(--ink); margin:8px 0 4px; }
+  footer { text-align:center; color:var(--muted); font-size:.78rem; margin-top:20px; }
+  @media (max-width: 780px) { .quiz-grid { grid-template-columns:1fr; } .quiz-head { display:block; } .score-pill { display:inline-block; margin-top:8px; } }
+  @media (max-width: 560px) { body { padding:14px 10px 40px; } .card { padding:20px 16px 18px; } .qtext { font-size:.9rem; } header h1 { font-size:1.25rem; } .question-card { min-height:0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Information Systems Programming - Assignment 1 Practice Quiz</h1>
+    <p>Multiple choice &middot; 40 questions &middot; one page</p>
+  </header>
+  <main class="card">
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="quiz-head">
+      <div>
+        <div class="qnum">One Page<span class="qtype-tag">Multiple Choice</span></div>
+        <h2 class="page-title">Questions 1-40</h2>
+        <div class="small">Tap a choice to check it immediately. Each question locks after one answer.</div>
+      </div>
+      <div class="score-pill" id="scorePill">Answered: 0 / 40</div>
+    </div>
+    <div class="quiz-grid" id="quizForm"></div>
+    <div class="actions submit-row">
+      <span class="submit-note" id="submitNote">Green marks the correct answer. Red marks your wrong pick.</span>
+      <div class="actions" style="margin-top:0">
+        <button class="btn ghost" type="button" id="resetBtn">Reset</button>
+      </div>
+    </div>
+    <div class="result" id="result"></div>
+  </main>
+  <footer>Practice set for Assignment 1 revision &middot; questions preserved from the original file</footer>
+</div>
+
+<script>
+var questions = [
+
+// ---------- PART 1 ----------
+{
+ q: "PART 1 (output): firstName = \"Anna\", lastName = \"Lee\". What does print(\"Hello \" + fullName + \" !\") output?",
+ o: ["Hello Anna Lee !", "Hello AnnaLee!", "Hello Anna Lee!", "Hello  Anna  Lee  !"],
+ a: 0
+},
+{
+ q: "PART 1 (syntax): What does fullName = firstName + \" \" + lastName do?",
+ o: ["Concatenates the two strings with a single space between them", "Adds the two strings numerically", "Creates a list of two names", "Multiplies the two strings together"],
+ a: 0
+},
+{
+ q: "PART 1 (lesson): What data type does input() return?",
+ o: ["str (string)", "int (integer)", "float", "bool"],
+ a: 0
+},
+{
+ q: "GENERAL (syntax): What does an empty print() statement do?",
+ o: ["Prints a blank line", "Prints the word None", "Causes a syntax error", "Prints a single space"],
+ a: 0
+},
+
+// ---------- PART 2 ----------
+{
+ q: "PART 2 (output): fullName = \"Tom\", marks = \"90\". What do the two lines after the blank line print?",
+ o: ["Hello Tom!  /  You got 90 for Python", "Hello Tom !  /  You got 90 for Python", "Hello Tom!  /  You got 90.0 for Python", "Hello Tom!  /  You got ninety for Python"],
+ a: 0
+},
+{
+ q: "PART 2 (lesson): marks is concatenated with + without int() or str(). Why does this work?",
+ o: ["input() already returns a string, and strings can be joined with +", "Python automatically converts integers to strings", "marks is secretly an integer", "+ works on any combination of types"],
+ a: 0
+},
+{
+ q: "PART 2 (lesson): If marks were stored as int(input(...)), what would \"You got \" + marks cause?",
+ o: ["A TypeError, because str and int cannot be joined with +", "It would still work normally", "It would print marks as 0", "It would convert marks to a float"],
+ a: 0
+},
+
+// ---------- PART 3 ----------
+{
+ q: "PART 3 (output): studentId = \"S01\", participation = 10, quiz = 40, assignment = 20. What are the two output lines (after the blank line)?",
+ o: ["Student's ID number is S01.  /  Total Marks 70.", "Student's ID number is S01.  /  Total Marks 60.", "Student's ID number is S01  /  Total Marks 70", "Student's ID number is S01.  /  Total Marks 70 marks."],
+ a: 0
+},
+{
+ q: "PART 3 (output): If participation = 20, quiz = 50, assignment = 30, what is totalMarks?",
+ o: ["100", "80", "110", "\"100\" (a string)"],
+ a: 0
+},
+{
+ q: "PART 3 (syntax): Why is int() used around the marks inputs but NOT around studentId?",
+ o: ["studentId stays as text; the marks must be numbers so they can be added", "int() does not work on ID strings", "studentId is already a number", "It is a mistake in the code"],
+ a: 0
+},
+{
+ q: "PART 3 (syntax): Why is str(totalMarks) used in the final print()?",
+ o: ["To convert the integer to a string so it can be joined with + and the other text", "To round the total marks", "To make the number negative", "It is optional and changes nothing"],
+ a: 0
+},
+
+// ---------- PART 4 ----------
+{
+ q: "PART 4 (output): productName = \"Box\", productPrice = 4, numberOfUnits = 5. What does the Price line show?",
+ o: ["Price        : 20.00", "Price        : 20", "Price        : 20.0", "Price        : 4.00"],
+ a: 0
+},
+{
+ q: "PART 4 (output): Same inputs as above (price is 20). What does the Tax line show? (taxRate = 0.10)",
+ o: ["Tax          : 2.00", "Tax          : 2.0", "Tax          : 0.20", "Tax          : 2"],
+ a: 0
+},
+{
+ q: "PART 4 (output): Same inputs (price 20, tax 2). What does the Total Amount line show?",
+ o: ["Total Amount : 22.00", "Total Amount : 22", "Total Amount : 22.0", "Total Amount : 24.00"],
+ a: 0
+},
+{
+ q: "PART 4 (output): productPrice = 2.5, numberOfUnits = 3. What is the value of totalAmount before formatting? (price = 7.5, tax = 0.75)",
+ o: ["8.25", "7.5", "8.2", "9.0"],
+ a: 0
+},
+{
+ q: "PART 4 (output): If numberOfUnits = 3, what does the Unit(s) line print? (it uses str(numberOfUnits))",
+ o: ["Unit(s)      : 3", "Unit(s)      : 3.00", "Unit(s)      : 3.0", "Unit(s)      : three"],
+ a: 0
+},
+{
+ q: "PART 4 (syntax): What does format(price, \".2f\") do?",
+ o: ["Returns the number as a string with exactly 2 decimal places", "Rounds to 2 significant figures", "Divides the number by 2", "Converts the number to an integer"],
+ a: 0
+},
+{
+ q: "PART 4 (lesson): Why is productPrice read with float() but numberOfUnits with int()?",
+ o: ["A price can have decimals; a number of units is a whole number", "float() runs faster than int()", "int() cannot handle prices", "There is no reason; they are interchangeable"],
+ a: 0
+},
+
+// ---------- PART 5 ----------
+{
+ q: "PART 5 (output): items = [2, 4, 6, 8, 10]. What does the Original items line print after the dash?",
+ o: ["[2, 4, 6, 8, 10]", "2, 4, 6, 8, 10", "[2,4,6,8,10]", "{2, 4, 6, 8, 10}"],
+ a: 0
+},
+{
+ q: "PART 5 (output): Starting from [2, 4, 6, 8, 10], the user appends 12. What is the list now?",
+ o: ["[2, 4, 6, 8, 10, 12]", "[12, 2, 4, 6, 8, 10]", "[2, 4, 6, 8, 10]", "[2, 4, 6, 8, 10, \"12\"]"],
+ a: 0
+},
+{
+ q: "PART 5 (output): From [2, 4, 6, 8, 10, 12], the user removes 6. What is the final list?",
+ o: ["[2, 4, 8, 10, 12]", "[2, 4, 6, 8, 10]", "[4, 8, 10, 12]", "[2, 4, 6, 8, 12]"],
+ a: 0
+},
+{
+ q: "PART 5 (syntax): What does items.append(newNumber) do?",
+ o: ["Adds newNumber to the end of the list", "Inserts newNumber at the beginning", "Removes newNumber from the list", "Sorts the list"],
+ a: 0
+},
+{
+ q: "PART 5 (syntax): What does items.remove(6) do?",
+ o: ["Removes the first item whose value equals 6", "Removes the item at index 6", "Removes the last item", "Removes every even number"],
+ a: 0
+},
+{
+ q: "PART 5 (lesson): What happens if you call remove() with a value that is NOT in the list?",
+ o: ["Python raises a ValueError", "Nothing happens", "It adds the value instead", "It removes the last item"],
+ a: 0
+},
+{
+ q: "PART 5 (lesson): Lists in Python are...",
+ o: ["Mutable (can be changed after they are created)", "Immutable (can never be changed)", "Always kept sorted automatically", "Only able to hold numbers"],
+ a: 0
+},
+
+// ---------- PART 6 ----------
+{
+ q: "PART 6 (syntax): range(1, 7) generates which sequence of numbers?",
+ o: ["1, 2, 3, 4, 5, 6", "1, 2, 3, 4, 5, 6, 7", "0, 1, 2, 3, 4, 5, 6", "1, 3, 5, 7"],
+ a: 0
+},
+{
+ q: "PART 6 (output): How many times does each for loop run (how many items per sample)?",
+ o: ["6", "7", "5", "1"],
+ a: 0
+},
+{
+ q: "PART 6 (output): sample1 = [3, 1, 2, 1, 5, 4]. What does the \"Original items\" line print? (brackets removed with .replace)",
+ o: ["3, 1, 2, 1, 5, 4", "[3, 1, 2, 1, 5, 4]", "1, 1, 2, 3, 4, 5", "{3, 1, 2, 5, 4}"],
+ a: 0
+},
+{
+ q: "PART 6 (syntax): What does str(sample1).replace(\"[\", \"\").replace(\"]\", \"\") do?",
+ o: ["Turns the list into a string, then removes the square brackets from it", "Removes all the numbers from the list", "Sorts the list", "Converts the list into a set"],
+ a: 0
+},
+{
+ q: "PART 6 (output): sample1 = [3, 1, 2, 1, 5, 4]. What does sorted(sample1) print?",
+ o: ["[1, 1, 2, 3, 4, 5]", "[5, 4, 3, 2, 1, 1]", "1, 1, 2, 3, 4, 5", "[1, 2, 3, 4, 5]"],
+ a: 0
+},
+{
+ q: "PART 6 (lesson): Does sorted(sample1) change the original sample1?",
+ o: ["No, it returns a new sorted list and leaves the original unchanged", "Yes, it sorts the original list in place", "It deletes the original list", "It only works on sets"],
+ a: 0
+},
+{
+ q: "PART 6 (output): Each sample has 6 items. How many items does mergedSamples = sample1 + sample2 have?",
+ o: ["12", "6", "36", "It depends on duplicates"],
+ a: 0
+},
+{
+ q: "PART 6 (syntax): What does the + operator do between two lists?",
+ o: ["Joins (concatenates) them into one combined list", "Adds them element by element", "Removes duplicate values", "Sorts both lists"],
+ a: 0
+},
+{
+ q: "PART 6 (output): mergedSamples = [1, 2, 2, 3, 3, 3]. What does print(set(mergedSamples)) display?",
+ o: ["{1, 2, 3}", "[1, 2, 3]", "1, 2, 3", "{1, 2, 2, 3, 3, 3}"],
+ a: 0
+},
+{
+ q: "PART 6 (lesson): What does set() do to the merged list of values?",
+ o: ["Removes duplicate values, keeping only the unique ones", "Sorts the values from low to high", "Reverses the list", "Doubles every value"],
+ a: 0
+},
+{
+ q: "PART 6 (lesson): How are sets displayed, and is their order guaranteed?",
+ o: ["With curly braces { }, and the order is NOT guaranteed", "With square brackets [ ], order guaranteed", "With parentheses ( ), order guaranteed", "With angle brackets < >, order not guaranteed"],
+ a: 0
+},
+
+// ---------- GENERAL PYTHON LESSONS ----------
+{
+ q: "GENERAL (syntax): Which built-in function reads text typed by the user from the keyboard?",
+ o: ["input()", "print()", "read()", "scan()"],
+ a: 0
+},
+{
+ q: "GENERAL (lesson): What does int(\"25\") evaluate to?",
+ o: ["25 (an integer)", "\"25\" (a string)", "25.0 (a float)", "An error"],
+ a: 0
+},
+{
+ q: "GENERAL (lesson): What does float(\"3\") evaluate to?",
+ o: ["3.0", "3", "\"3.0\"", "An error"],
+ a: 0
+},
+{
+ q: "GENERAL (syntax): What does a line starting with # do in Python?",
+ o: ["It is a comment that Python ignores when running the code", "It prints the line to the screen", "It defines a variable", "It causes an error"],
+ a: 0
+}
+
+];
+
+const letters = ["A", "B", "C", "D"];
+const form = document.getElementById("quizForm");
+const result = document.getElementById("result");
+const scorePill = document.getElementById("scorePill");
+const progress = document.getElementById("progress");
+var states = questions.map(function() {
+  return { answered:false, scored:false, chosen:null };
+});
+
+function escapeHTML(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function renderQuiz() {
+  form.innerHTML = "";
+  questions.forEach(function(q, i) {
+    var block = document.createElement("article");
+    block.className = "question-card";
+    block.id = "block" + i;
+    var html = '<div class="question-number">Question ' + (i + 1) + '</div>';
+    html += '<p class="qtext">' + escapeHTML(q.q) + '</p>';
+    html += '<div class="options">';
+    q.o.forEach(function(option, j) {
+      html += '<button class="opt" type="button" data-question="' + i + '" data-choice="' + j + '">';
+      html += '<span class="marker">' + letters[j] + '</span>';
+      html += '<span class="optText">' + escapeHTML(option) + '</span>';
+      html += '</button>';
+    });
+    html += '</div><div class="feedback" id="fb' + i + '"></div>';
+    block.innerHTML = html;
+    form.appendChild(block);
+    applyQuestionState(i);
+  });
+  form.querySelectorAll(".opt").forEach(function(button) {
+    button.addEventListener("click", chooseAnswer);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  var answered = states.filter(function(state) { return state.answered; }).length;
+  var score = states.filter(function(state) { return state.scored; }).length;
+  scorePill.textContent = "Correct: " + score + " / " + questions.length + " · Answered: " + answered + " / " + questions.length;
+  progress.style.width = Math.round((answered / questions.length) * 100) + "%";
+  result.innerHTML = answered === questions.length
+    ? '<div class="score-big">' + score + ' / ' + questions.length + '</div><p><strong>' + Math.round((score / questions.length) * 100) + '%</strong> correct</p>'
+    : "";
+}
+
+function applyQuestionState(index) {
+  var state = states[index];
+  var q = questions[index];
+  var block = document.getElementById("block" + index);
+  if (!block) return;
+  var buttons = block.querySelectorAll(".opt");
+  var fb = document.getElementById("fb" + index);
+  buttons.forEach(function(button) {
+    var choice = Number(button.dataset.choice);
+    button.classList.remove("correct", "wrong", "reveal");
+    button.disabled = state.answered;
+    if (!state.answered) return;
+    if (choice === q.a) button.classList.add(choice === state.chosen ? "correct" : "reveal");
+    if (choice === state.chosen && choice !== q.a) button.classList.add("wrong");
+  });
+  fb.className = "feedback";
+  fb.textContent = "";
+  if (state.answered && state.scored) {
+    fb.className = "feedback good";
+    fb.textContent = "Correct. This question is now locked.";
+  } else if (state.answered) {
+    fb.className = "feedback bad";
+    fb.textContent = "Not quite. Correct answer: " + q.o[q.a] + " This question is now locked.";
+  }
+}
+
+function chooseAnswer(event) {
+  var button = event.currentTarget;
+  var index = Number(button.dataset.question);
+  var choice = Number(button.dataset.choice);
+  var state = states[index];
+  if (state.answered) return;
+  state.answered = true;
+  state.chosen = choice;
+  state.scored = choice === questions[index].a;
+  applyQuestionState(index);
+  updateProgress();
+}
+
+function resetQuiz() {
+  states = questions.map(function() {
+    return { answered:false, scored:false, chosen:null };
+  });
+  renderQuiz();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.getElementById("resetBtn").addEventListener("click", resetQuiz);
+renderQuiz();
+</script>
+</body>
+</html>
