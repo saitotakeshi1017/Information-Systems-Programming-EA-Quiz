@@ -1,0 +1,3586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Python Lectures 8-10 Practice Quiz</title>
+<style>
+  :root {
+    --bg:        #F5EFE0;
+    --bg-soft:   #EDE4D0;
+    --card:      #FBF7EC;
+    --ink:       #2E3A3A;
+    --muted:     #6B7775;
+    --accent:    #5B8A8A;
+    --accent-d:  #406A6A;
+    --good:      #7BA77B;
+    --good-bg:   #DFEBDC;
+    --bad:       #B8746B;
+    --bad-bg:    #EFD9D3;
+    --hi:        #E8C97A;
+    --line:      #d8cfba;
+    --shadow:    0 2px 0 rgba(46,58,58,0.08), 0 6px 18px rgba(46,58,58,0.06);
+    --radius:    14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height:1.55; min-height:100vh; display:flex; justify-content:center;
+    padding:24px 14px 60px;
+  }
+  .wrap { width:100%; max-width:860px; }
+  header { text-align:center; margin-bottom:18px; }
+  header h1 { font-size:1.45rem; margin:0 0 4px; color:var(--accent-d); letter-spacing:.3px; }
+  header p { margin:0; color:var(--muted); font-size:.9rem; }
+  .top-quiz-timer { display:flex; justify-content:flex-end; align-items:center; margin:0 0 10px; min-height:34px; }
+  .data-store { display:none; }
+  .jump { display:flex; flex-wrap:wrap; gap:7px; margin:0 0 12px; justify-content:center; }
+  .jump button { background:var(--card); color:var(--accent-d); border:1px solid var(--line); border-radius:10px; padding:7px 10px; font-weight:700; cursor:pointer; min-width:34px; }
+  .jump button.current { background:var(--accent); color:#fff; border-color:var(--accent-d); }
+  .jump button.done { background:var(--good-bg); border-color:var(--good); }
+  .jump button.miss { background:var(--bad-bg); border-color:var(--bad); }
+  .progress-track { width:100%; height:6px; background:var(--bg-soft); border-radius:999px; overflow:hidden; margin-bottom:16px; }
+  .progress-fill { height:100%; background:var(--accent); width:0%; transition:width .3s ease; }
+  .card { background:var(--card); border-radius:var(--radius); padding:24px 22px 20px; box-shadow:var(--shadow); }
+  .qnum { font-size:.75rem; letter-spacing:1.2px; color:var(--accent); text-transform:uppercase; margin-bottom:6px; font-weight:600; }
+  .qtype-tag { display:inline-block; margin-left:8px; padding:2px 8px; border-radius:999px; background:var(--hi); color:#6b4f1a; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+  .qtext { font-size:1.08rem; margin:4px 0 16px; color:var(--ink); }
+  .source { font-size:.78rem; color:var(--muted); margin-top:-8px; margin-bottom:14px; }
+  code { background:var(--hi); padding:1px 6px; border-radius:4px; font-family:"SF Mono", Menlo, Consolas, monospace; font-size:.92em; }
+  .options { display:grid; gap:9px; }
+  .opt {
+    text-align:left; background:#FFFDF6; border:1.5px solid var(--line); color:var(--ink);
+    padding:11px 13px; border-radius:10px; font-size:.96rem; cursor:pointer;
+    transition:all .15s ease; font-family:inherit; line-height:1.45; width:100%;
+    display:flex; align-items:center; white-space:normal; overflow:hidden;
+  }
+  .opt:hover:not(:disabled) { border-color:var(--accent); background:#FFFEFA; transform:translateY(-1px); }
+  .opt:disabled { cursor:default; }
+  .opt.correct, .opt.reveal { background:var(--good-bg); border-color:var(--good); color:#2f4a2f; }
+  .opt.wrong { background:var(--bad-bg); border-color:var(--bad); color:#5a2c26; }
+  .marker { display:inline-block; width:22px; height:22px; line-height:22px; border-radius:50%; background:var(--bg-soft); color:var(--muted); text-align:center; font-size:.78rem; margin-right:10px; font-weight:700; flex:0 0 auto; }
+  .opt.correct .marker, .opt.reveal .marker { background:var(--good); color:white; }
+  .opt.wrong .marker { background:var(--bad); color:white; }
+  .optText { display:inline-block; }
+  .small { color:var(--muted); font-size:.84rem; }
+
+  .select-match { display:flex; flex-direction:column; gap:10px; }
+  .select-row { display:grid; grid-template-columns:minmax(170px, 34%) 1fr; gap:10px; align-items:center; background:#FFFDF6; border:1.5px solid var(--line); border-radius:10px; padding:10px 12px; }
+  .select-term { font-weight:700; color:var(--accent-d); font-size:.94rem; }
+  .select-row select { width:100%; font:inherit; color:var(--ink); background:white; border:1.5px solid var(--line); border-radius:9px; padding:8px 10px; cursor:pointer; }
+  .select-row.correct { background:var(--good-bg); border-color:var(--good); }
+  .select-row.wrong { background:var(--bad-bg); border-color:var(--bad); }
+  .select-row.correct select { border-color:var(--good); background:#f7fff4; color:#2f4a2f; }
+  .select-row.wrong select { border-color:var(--bad); background:#fff6f3; color:#5a2c26; }
+  .select-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:13px; }
+  .dd-hint { font-size:.85rem; color:var(--accent-d); margin-bottom:14px; padding:8px 12px; background:rgba(91,138,138,.08); border-radius:8px; border-left:3px solid var(--accent); }
+  .dd-card { background:var(--card); border:1.5px solid var(--accent); color:var(--accent-d); padding:7px 12px; border-radius:8px; font-size:.9rem; cursor:grab; font-weight:500; user-select:none; -webkit-user-select:none; touch-action:none; -webkit-user-drag:none; transition:background .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .15s ease; font-family:inherit; line-height:1.4; text-align:left; }
+  .dd-card:hover:not(:disabled) { background:#fff; }
+  .dd-card:active:not(:disabled) { cursor:grabbing; }
+  .dd-card.selected { background:#FFFDF6; color:var(--accent-d); transform:translateY(-1px); box-shadow:0 0 0 3px rgba(91,138,138,.22); }
+  .dd-card.drag-source { opacity:1; background:#FFFDF6; color:var(--accent-d); border-color:var(--accent-d); box-shadow:0 0 0 3px rgba(91,138,138,.18); }
+  .dd-drag-ghost { position:fixed; left:0; top:0; z-index:9998; pointer-events:none; opacity:1; background:#FFFDF6; color:var(--accent-d); border:1.5px solid var(--accent-d); box-shadow:0 14px 30px rgba(46,58,58,.2); transform:translate3d(var(--drag-x,0), var(--drag-y,0), 0); cursor:grabbing; max-width:min(420px, calc(100vw - 28px)); }
+  .dd-card.correct { background:var(--good-bg); border-color:var(--good); color:#2f4a2f; cursor:default; }
+  .dd-card.wrong { background:var(--bad-bg); border-color:var(--bad); color:#5a2c26; cursor:default; }
+  .slot-target { border:2px dashed var(--line); border-radius:8px; background:var(--bg-soft); padding:5px; min-height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:border-color .15s ease, background .15s ease, box-shadow .15s ease; }
+  .slot-target:hover { border-color:var(--accent); }
+  .slot-target.drop-active { border-color:var(--accent-d); background:#FFFDF6; box-shadow:inset 0 0 0 2px rgba(91,138,138,.18); }
+  .slot-target.has-card { border-style:solid; background:#fbf3df; padding:4px; }
+  .slot-target.correct { border-color:var(--good); background:var(--good-bg); border-style:solid; }
+  .slot-target.wrong { border-color:var(--bad); background:var(--bad-bg); border-style:solid; }
+  .slot-target .placeholder { color:var(--muted); font-size:.82rem; }
+  .slot-target .dd-card { width:100%; }
+  .match-list, .order-list { display:flex; flex-direction:column; gap:8px; }
+  .match-row { display:flex; align-items:center; gap:10px; }
+  .match-label { flex:1; font-size:.9rem; color:var(--ink); }
+  .match-row .slot-target { width:320px; flex:none; }
+  .order-row { display:flex; align-items:stretch; gap:10px; }
+  .order-num { width:34px; min-height:44px; border-radius:8px; background:var(--accent); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; font-size:1rem; }
+  .order-row .slot-target { flex:1; }
+  .card-bank { margin-top:14px; padding:11px 12px; background:var(--bg-soft); border-radius:10px; border:1px solid var(--line); }
+  .card-bank-label { font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-weight:600; }
+  .card-bank-cards { display:flex; flex-wrap:wrap; gap:6px; min-height:38px; border:1.5px dashed transparent; border-radius:9px; padding:3px; transition:border-color .15s ease, background .15s ease; }
+  .card-bank-cards.drop-active { border-color:var(--accent); background:#FFFDF6; }
+  .fillbox { display:grid; gap:10px; }
+  .fill-row { background:#FFFDF6; border:1.5px solid var(--line); border-radius:10px; padding:12px 13px; font-size:.96rem; }
+  .fill-row input { font:inherit; font-weight:600; color:var(--ink); padding:6px 8px; margin:0 4px; border-radius:8px; border:1.5px solid var(--line); background:#fff; min-width:170px; max-width:100%; }
+  .fill-row input.correct { background:var(--good-bg); border-color:var(--good); color:#2f4a2f; }
+  .feedback { margin-top:14px; padding:11px 13px; border-radius:10px; font-size:.92rem; display:none; line-height:1.5; }
+  .feedback.good { background:var(--good-bg); color:#2f4a2f; display:block; }
+  .feedback.bad { background:var(--bad-bg); color:#5a2c26; display:block; }
+  .feedback.info { background:var(--bg-soft); color:var(--ink); display:block; }
+  .actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  button.btn { background:var(--accent); color:#FBF7EC; border:none; padding:11px 18px; border-radius:10px; font-size:.96rem; font-weight:600; cursor:pointer; font-family:inherit; transition:background .15s ease, transform .1s ease; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; }
+  button.btn:hover { background:var(--accent-d); }
+  button.btn:active { transform:translateY(1px); }
+  button.btn.ghost { background:transparent; color:var(--accent-d); border:1.5px solid var(--accent); }
+  button.btn.ghost:hover { background:var(--bg-soft); }
+  button.btn.arrow { width:50px; padding:11px 0; font-size:1.2rem; line-height:1; }
+  .result { text-align:center; padding:12px 6px 6px; }
+  .result h2 { margin:0 0 6px; color:var(--accent-d); font-size:1.5rem; }
+  .score-big { font-size:2.6rem; font-weight:700; color:var(--ink); margin:12px 0 4px; }
+  footer { text-align:center; color:var(--muted); font-size:.78rem; margin-top:20px; }
+
+  .hidden { display:none !important; }
+  .opening { text-align:center; padding:28px 18px 24px; }
+  .opening h2 { margin:0 0 8px; color:var(--accent-d); font-size:1.55rem; }
+  .opening p { margin:8px auto; max-width:620px; color:var(--muted); }
+  .opening .attempt-badge { display:inline-block; margin:14px 0 18px; background:var(--bg-soft); border:1px solid var(--line); border-radius:999px; padding:7px 14px; color:var(--ink); font-weight:700; }
+  .opening-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .practice-message { margin:12px auto 0; max-width:520px; }
+  .attempt-history { margin:18px auto 18px; max-width:620px; text-align:left; background:#FFFDF6; border:1.5px solid var(--line); border-radius:var(--radius); padding:14px; box-shadow:0 2px 0 rgba(46,58,58,0.04); }
+  .attempt-history h3 { margin:0 0 10px; color:var(--accent-d); font-size:1rem; }
+  .attempt-list { list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+  .attempt-list li { display:flex; justify-content:space-between; gap:10px; align-items:center; background:var(--bg-soft); border:1px solid var(--line); border-radius:10px; padding:9px 11px; font-size:.9rem; }
+  .attempt-list .attempt-meta { color:var(--muted); font-size:.8rem; }
+  .attempt-list .attempt-score { color:var(--ink); font-weight:800; white-space:nowrap; }
+  .submit-row { justify-content:space-between; align-items:center; }
+  .submit-note { color:var(--muted); font-size:.84rem; }
+  .timer-pill { position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:9px; min-width:104px; justify-content:center; background:linear-gradient(180deg, #FFFDF6, var(--card)); padding:7px 15px 8px 12px; border-radius:999px; border:1px solid var(--line); transition:background .35s ease, border-color .35s ease, color .35s ease, box-shadow .35s ease; font-weight:800; color:var(--accent-d); box-shadow:0 5px 16px rgba(46,58,58,0.07), inset 0 1px 0 rgba(255,255,255,.7); letter-spacing:.6px; }
+  .stopwatch { position:relative; width:22px; height:22px; border:2px solid currentColor; border-radius:50%; flex:0 0 auto; opacity:.9; box-shadow:inset 0 0 0 2px rgba(255,255,255,.45); }
+  .stopwatch::before { content:""; position:absolute; width:8px; height:4px; border-radius:4px 4px 2px 2px; background:currentColor; left:50%; top:-7px; transform:translateX(-50%); opacity:.82; }
+  .stopwatch::after { content:""; position:absolute; width:5px; height:3px; border-radius:4px; background:currentColor; right:-5px; top:1px; transform:rotate(38deg); opacity:.65; }
+  .stopwatch-hand { position:absolute; left:50%; top:50%; width:2px; height:7px; border-radius:999px; background:currentColor; transform-origin:50% 100%; transform:translate(-50%, -100%) rotate(0deg); }
+  .timer-pill.running .stopwatch-hand { animation:stopwatchTick var(--timer-duration, 900s) linear forwards; }
+  .stopwatch-hand::after { content:""; position:absolute; left:50%; bottom:-3px; width:4px; height:4px; border-radius:50%; background:currentColor; transform:translateX(-50%); }
+  .timer-pill.warning { background:linear-gradient(180deg, #fff8f2, var(--bad-bg)); border-color:var(--bad); color:#5a2c26; }
+  .timer-pill.warning .stopwatch { opacity:1; }
+  .timer-pill.urgent { box-shadow:0 0 0 3px rgba(255,80,80,.14), 0 5px 16px rgba(46,58,58,0.07); }
+  .loading-screen { display:flex; align-items:center; justify-content:center; padding:12px 0; min-height:240px; background:transparent; }
+  .loading-panel { width:min(100%, 460px); margin:0 auto; background:linear-gradient(180deg, #FFFDF6 0%, var(--card) 100%); color:var(--ink); border:1.5px solid var(--line); border-radius:18px; padding:26px 18px 22px; box-shadow:0 10px 28px rgba(46,58,58,.08), inset 0 1px 0 rgba(255,255,255,.6); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .loading-title { font-size:1.35rem; font-weight:700; margin:16px 0 8px; letter-spacing:.2px; color:var(--accent-d); text-align:center; }
+  .loading-sub { color:var(--muted); font-size:.92rem; text-align:center; max-width:360px; line-height:1.6; }
+  .loading-mini { margin-top:10px; color:var(--muted); font-size:.8rem; text-align:center; }
+  .wait-orb { position:relative; width:108px; height:108px; }
+  .wait-core { position:absolute; inset:38px; border-radius:50%; background:linear-gradient(180deg, var(--card), #fff); border:1px solid var(--line); box-shadow:inset 0 2px 8px rgba(46,58,58,.06); }
+  .wait-ring { position:absolute; border-radius:50%; border:4px solid transparent; }
+  .wait-ring.ring-a { inset:0; border-top-color:var(--accent); border-right-color:#82AAA6; animation:spinRing 1s linear infinite; }
+  .wait-ring.ring-b { inset:12px; border-bottom-color:var(--hi); border-left-color:#9BBDB5; animation:spinRingReverse 1.35s linear infinite; }
+  .wait-dot { position:absolute; width:12px; height:12px; border-radius:50%; background:#E8C97A; top:10px; left:calc(50% - 6px); box-shadow:0 0 0 5px rgba(232,201,122,.14); animation:dotPulse 1.2s ease-in-out infinite; }
+  @keyframes spinRing { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+  @keyframes spinRingReverse { from { transform:rotate(360deg); } to { transform:rotate(0deg); } }
+  @keyframes dotPulse { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(.82); opacity:.75; } }
+  .guard-toast { position:fixed; left:50%; top:18px; transform:translateX(-50%) translateY(-10px); opacity:0; pointer-events:none; z-index:9999; background:linear-gradient(180deg, #FFFDF6, var(--card)); color:var(--accent-d); border:1.5px solid var(--line); border-radius:999px; padding:9px 15px; box-shadow:0 10px 26px rgba(46,58,58,.12); font-size:.9rem; font-weight:700; transition:opacity .18s ease, transform .18s ease; }
+  .guard-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  @keyframes stopwatchTick { from { transform:translate(-50%, -100%) rotate(0deg); } to { transform:translate(-50%, -100%) rotate(360deg); } }
+  @media (max-width: 560px) {
+    html, body { height:100%; overflow:hidden; }
+    body { min-height:0; display:block; padding:0; }
+    .wrap { height:100vh; height:100svh; overflow-y:auto; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; padding:14px 10px 40px; }
+    .card { padding:20px 16px 18px; }
+    .qtext { font-size:1rem; }
+    header h1 { font-size:1.25rem; }
+    .match-row { flex-direction:column; align-items:stretch; gap:4px; }
+    .select-row { grid-template-columns:1fr; gap:6px; }
+    .match-row .slot-target { width:100%; }
+    .fill-row input { width:100%; margin:8px 0 0; }
+    .loading-panel { padding:22px 14px 18px; }
+    .wait-orb { width:92px; height:92px; }
+    .wait-core { inset:32px; }
+    .loading-title { font-size:1.2rem; }
+    .timer-pill { min-width:98px; padding-right:13px; }
+    .stopwatch { width:20px; height:20px; }
+  }
+
+  .qtext { display:block; }
+  .code-console {
+    margin:10px 0 2px;
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+    background:#102d3d;
+    color:#d8e7ee;
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:0;
+    padding:10px 12px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    font-family:Consolas, "SFMono-Regular", Menlo, Monaco, "Courier New", monospace;
+    font-size:.9rem;
+    line-height:1.44;
+    font-weight:400;
+    letter-spacing:0;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    tab-size:4;
+  }
+  .code-console code {
+    background:transparent;
+    padding:0;
+    border-radius:0;
+    font:inherit;
+    color:inherit;
+  }
+  .tok-id { color:#d8e7ee; }
+  .tok-fn { color:#ffd565; }
+  .tok-kw { color:#f2a34d; }
+  .tok-num, .tok-br { color:#ef5f8f; }
+  .tok-str { color:#8ee481; }
+  .tok-op { color:#e39a35; }
+  .tok-comment { color:#78909c; }
+  @media (max-width:560px){
+    .code-console { font-size:.78rem; padding:8px 10px; }
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-quiz-timer hidden" id="quizBar">
+    <span class="timer-pill" id="timerPill"><span class="stopwatch" aria-hidden="true"><span class="stopwatch-hand"></span></span><strong id="timer">150:00</strong></span>
+  </div>
+  <header>
+    <h1>Python Lectures 8-10 Practice Quiz</h1>
+    <p>99 questions - 150-minute timer - Lecture 8 lambda/recursion, Lecture 9 GUI/packages, Lecture 10 validation/RegEx</p>
+  </header>
+  <div class="data-store" aria-hidden="true">
+    <span id="round">1</span>
+    <span id="qIdx">1</span>
+    <span id="qTotal">0</span>
+    <span id="score">0</span>
+    <span id="best">—</span>
+    <span id="completed">0</span>
+  </div>
+  <div class="jump" id="jump"></div>
+  <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progress"></div></div>
+  <div class="card" id="card"></div>
+  <footer>Information Systems Programming - slide-sourced practice quiz for lectures 8, 9, and 10</footer>
+</div>
+<script>
+const BANK = [
+  {
+    "id": "q001",
+    "type": "mcq",
+    "title": "Functions vs loops",
+    "source": "Lecture 8, slide page 6",
+    "prompt": "In the lecture's function-vs-loop comparison, what is the main role of a function?",
+    "options": [
+      {
+        "text": "It groups linked statements so they can perform a task when called.",
+        "correct": true
+      },
+      {
+        "text": "It repeats one statement forever.",
+        "correct": false
+      },
+      {
+        "text": "It stores only numeric data.",
+        "correct": false
+      },
+      {
+        "text": "It replaces the Python interpreter.",
+        "correct": false
+      }
+    ],
+    "explanation": "A function is a reusable group of linked statements that performs a task. A loop is the structure mainly used for repetition."
+  },
+  {
+    "id": "q002",
+    "type": "mcq",
+    "title": "Function declaration",
+    "source": "Lecture 8, slide page 7",
+    "prompt": "Which skeleton best matches a Python user-defined function from the slides?",
+    "options": [
+      {
+        "text": "function name(parameters) { statements }",
+        "correct": false
+      },
+      {
+        "text": "def function_Name(parameters): statements; optional return expression",
+        "correct": true
+      },
+      {
+        "text": "func function_Name -> parameters -> return",
+        "correct": false
+      },
+      {
+        "text": "define function_Name(parameters) end",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide shows Python's def keyword, a function name, optional parameters, indented statements, and an optional return expression."
+  },
+  {
+    "id": "q003",
+    "type": "mcq",
+    "title": "Built-in and user-defined functions",
+    "source": "Lecture 8, slide page 7",
+    "prompt": "Which statement matches the lecture distinction between built-in and user-defined functions?",
+    "options": [
+      {
+        "text": "Built-in functions come with Python; user-defined functions are written for the program's own requirement.",
+        "correct": true
+      },
+      {
+        "text": "Built-in functions must always have parameters; user-defined functions cannot have parameters.",
+        "correct": false
+      },
+      {
+        "text": "Built-in functions are slower than user-defined functions.",
+        "correct": false
+      },
+      {
+        "text": "User-defined functions can only be used once.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slides describe built-in functions as common functions included with Python and user-defined functions as special functions written for a requirement."
+  },
+  {
+    "id": "q004",
+    "type": "mcq",
+    "title": "Calling before defining",
+    "source": "Lecture 8, slide page 8",
+    "prompt": "What happens when this script reaches the first line shown below?<pre class=\"code-console\" aria-label=\"code snippet\"><code>print(addNum(10, 20))\n\ndef addNum(val1, val2):\n    return val1 + val2</code></pre>",
+    "options": [
+      {
+        "text": "It prints 30.",
+        "correct": false
+      },
+      {
+        "text": "It prints None.",
+        "correct": false
+      },
+      {
+        "text": "It raises a NameError because addNum is called before it is defined.",
+        "correct": true
+      },
+      {
+        "text": "It silently skips the print statement.",
+        "correct": false
+      }
+    ],
+    "explanation": "The lecture explicitly warns that if a function is not defined before it is called, Python raises an error."
+  },
+  {
+    "id": "q005",
+    "type": "mcq",
+    "title": "Function without parameters",
+    "source": "Lecture 8, slide page 8",
+    "prompt": "What is the output if the user enters 78 and then 102?<pre class=\"code-console\" aria-label=\"code snippet\"><code>def addNum():\n    num1 = int(input(&quot;Enter your first number : &quot;))\n    num2 = int(input(&quot;Enter your second number: &quot;))\n    print(f&quot;{num1} + {num2} = {num1 + num2}&quot;)\n\naddNum()</code></pre>",
+    "options": [
+      {
+        "text": "78 + 102 = 180",
+        "correct": true
+      },
+      {
+        "text": "78 + 102 = 78102",
+        "correct": false
+      },
+      {
+        "text": "num1 + num2 = 180",
+        "correct": false
+      },
+      {
+        "text": "NameError",
+        "correct": false
+      }
+    ],
+    "explanation": "Both inputs are converted with int(), so the function prints the arithmetic sum 180."
+  },
+  {
+    "id": "q006",
+    "type": "mcq",
+    "title": "Function with parameters",
+    "source": "Lecture 8, slide page 8",
+    "prompt": "What does this program print when the inputs are 33 and 55?<pre class=\"code-console\" aria-label=\"code snippet\"><code>def addNum(val1, val2):\n    return val1 + val2\n\nnum1 = int(input(&quot;Enter your first number : &quot;))\nnum2 = int(input(&quot;Enter your second number: &quot;))\nsum = addNum(num1, num2)\nprint(f&quot;{num1} + {num2} = {sum}&quot;)</code></pre>",
+    "options": [
+      {
+        "text": "33 + 55 = 88",
+        "correct": true
+      },
+      {
+        "text": "33 + 55 = 3355",
+        "correct": false
+      },
+      {
+        "text": "88 + 33 = 55",
+        "correct": false
+      },
+      {
+        "text": "None",
+        "correct": false
+      }
+    ],
+    "explanation": "The values are passed as parameters, the function returns their sum, and the f-string prints 33 + 55 = 88."
+  },
+  {
+    "id": "q007",
+    "type": "matching",
+    "title": "Pythonic code",
+    "source": "Lecture 8, slide page 9",
+    "prompt": "Match each Pythonic-code quality with the best meaning.",
+    "pairs": [
+      {
+        "left": "correct syntax",
+        "right": "The code follows Python grammar."
+      },
+      {
+        "left": "clean code",
+        "right": "The code avoids unnecessary clutter."
+      },
+      {
+        "left": "readable code",
+        "right": "Another person can understand it easily."
+      },
+      {
+        "left": "easily maintainable code",
+        "right": "It can be changed or repaired without excessive confusion."
+      }
+    ],
+    "explanation": "The slide defines Pythonic code as using special Python tools, correct syntax, clean code, readable code, and maintainable code."
+  },
+  {
+    "id": "q008",
+    "type": "mcq",
+    "title": "Default arguments",
+    "source": "Lecture 8, slide page 10",
+    "prompt": "What is printed by the final function call?<pre class=\"code-console\" aria-label=\"code snippet\"><code>def greet(name=&quot;user&quot;, msg=&quot;welcome&quot;):\n    print(f&quot;Yes, {name}, {msg}.&quot;)\n\ntext3 = &quot;Take care&quot;\ngreet(msg=text3)</code></pre>",
+    "options": [
+      {
+        "text": "Yes, user, Take care.",
+        "correct": true
+      },
+      {
+        "text": "Yes, Take care, welcome.",
+        "correct": false
+      },
+      {
+        "text": "Yes, user, welcome.",
+        "correct": false
+      },
+      {
+        "text": "TypeError",
+        "correct": false
+      }
+    ],
+    "explanation": "Only msg is supplied by keyword, so name keeps its default value user and msg becomes Take care."
+  },
+  {
+    "id": "q009",
+    "type": "mcq",
+    "title": "Lambda concept",
+    "source": "Lecture 8, slide page 12",
+    "prompt": "Which description of a lambda function matches the lecture?",
+    "options": [
+      {
+        "text": "An anonymous function that can have only one expression.",
+        "correct": true
+      },
+      {
+        "text": "A named function that must contain several statements.",
+        "correct": false
+      },
+      {
+        "text": "A loop that calls itself.",
+        "correct": false
+      },
+      {
+        "text": "A module installed with pip.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide defines a lambda as an anonymous function, good for short operations, with only one expression."
+  },
+  {
+    "id": "q010",
+    "type": "mcq",
+    "title": "Lambda multiplication",
+    "source": "Lecture 8, slide page 12",
+    "prompt": "What is printed by the last line?<pre class=\"code-console\" aria-label=\"code snippet\"><code>mul = lambda x, z: x * z\nprint(mul(4, 8))</code></pre>",
+    "options": [
+      {
+        "text": "12",
+        "correct": false
+      },
+      {
+        "text": "32",
+        "correct": true
+      },
+      {
+        "text": "48",
+        "correct": false
+      },
+      {
+        "text": "TypeError",
+        "correct": false
+      }
+    ],
+    "explanation": "The lambda returns x * z, so 4 * 8 is 32."
+  },
+  {
+    "id": "q011",
+    "type": "mcq",
+    "title": "Lambda square",
+    "source": "Lecture 8, slide page 12",
+    "prompt": "What is the output?<pre class=\"code-console\" aria-label=\"code snippet\"><code>sq = lambda x: x ** 2\nprint(sq(8))</code></pre>",
+    "options": [
+      {
+        "text": "16",
+        "correct": false
+      },
+      {
+        "text": "64",
+        "correct": true
+      },
+      {
+        "text": "10",
+        "correct": false
+      },
+      {
+        "text": "82",
+        "correct": false
+      }
+    ],
+    "explanation": "The exponent operator ** squares the input here. 8 ** 2 is 64."
+  },
+  {
+    "id": "q012",
+    "type": "mcq",
+    "title": "Lambda cube",
+    "source": "Lecture 8, slide page 13",
+    "prompt": "What will this print?<pre class=\"code-console\" aria-label=\"code snippet\"><code>lambda_cube2 = lambda y: y ** 3\nprint(&quot;Lambda Function, cube 2: &quot;, lambda_cube2(4))</code></pre>",
+    "options": [
+      {
+        "text": "Lambda Function, cube 2:  12",
+        "correct": false
+      },
+      {
+        "text": "Lambda Function, cube 2:  64",
+        "correct": true
+      },
+      {
+        "text": "Lambda Function, cube 2:  81",
+        "correct": false
+      },
+      {
+        "text": "NameError",
+        "correct": false
+      }
+    ],
+    "explanation": "The lambda returns the cube of y. 4 ** 3 is 64."
+  },
+  {
+    "id": "q013",
+    "type": "mcq",
+    "title": "Lambda conditional expression",
+    "source": "Lecture 8, slide page 13",
+    "prompt": "What does this lambda return for 33?<pre class=\"code-console\" aria-label=\"code snippet\"><code>check_odd_even = lambda x: &quot;even&quot; if (x % 2 == 0) else &quot;odd&quot;\nprint(check_odd_even(33))</code></pre>",
+    "options": [
+      {
+        "text": "even",
+        "correct": false
+      },
+      {
+        "text": "odd",
+        "correct": true
+      },
+      {
+        "text": "33",
+        "correct": false
+      },
+      {
+        "text": "False",
+        "correct": false
+      }
+    ],
+    "explanation": "33 % 2 is not 0, so the conditional expression returns odd."
+  },
+  {
+    "id": "q014",
+    "type": "mcq",
+    "title": "Recursion concept",
+    "source": "Lecture 8, slide page 15",
+    "prompt": "A recursive function normally needs which two parts?",
+    "options": [
+      {
+        "text": "An import step and a package step.",
+        "correct": false
+      },
+      {
+        "text": "A base step and a recursion step.",
+        "correct": true
+      },
+      {
+        "text": "A pack step and a grid step.",
+        "correct": false
+      },
+      {
+        "text": "A try step and an except step only.",
+        "correct": false
+      }
+    ],
+    "explanation": "The recursion slide names a base step and a recursion step. The base step stops the recursive calls."
+  },
+  {
+    "id": "q015",
+    "type": "mcq",
+    "title": "Recursive countdown",
+    "source": "Lecture 8, slide page 15",
+    "prompt": "What is the output of countdown(5)?<pre class=\"code-console\" aria-label=\"code snippet\"><code>def countdown(count):\n    if count &lt;= 0:\n        print(&quot;Its finally done !&quot;)\n    else:\n        print(count, end=&quot; -&gt; &quot;)\n        countdown(count - 1)\n\ncountdown(5)</code></pre>",
+    "options": [
+      {
+        "text": "5 -> 4 -> 3 -> 2 -> 1 -> Its finally done !",
+        "correct": true
+      },
+      {
+        "text": "Its finally done ! -> 1 -> 2 -> 3 -> 4 -> 5",
+        "correct": false
+      },
+      {
+        "text": "5 4 3 2 1 0",
+        "correct": false
+      },
+      {
+        "text": "RecursionError",
+        "correct": false
+      }
+    ],
+    "explanation": "Each recursive call prints the current count before calling count - 1. At 0, the base case prints the final message."
+  },
+  {
+    "id": "q016",
+    "type": "mcq",
+    "title": "Factorial base case",
+    "source": "Lecture 8, slide page 16",
+    "prompt": "In the lecture's factorial recursion, why does factorial(0) return 1?",
+    "options": [
+      {
+        "text": "Because 0! is defined as 1 and it is the base case.",
+        "correct": true
+      },
+      {
+        "text": "Because Python cannot multiply by 0.",
+        "correct": false
+      },
+      {
+        "text": "Because 0 is converted to True.",
+        "correct": false
+      },
+      {
+        "text": "Because recursion always returns 1.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide lists 0! = 1 and uses if num == 0: return 1 as the base case."
+  },
+  {
+    "id": "q017",
+    "type": "mcq",
+    "title": "Factorial output",
+    "source": "Lecture 8, slide page 16",
+    "prompt": "What is printed?<pre class=\"code-console\" aria-label=\"code snippet\"><code>def factorial(num):\n    if num == 0:\n        return 1\n    else:\n        return num * factorial(num - 1)\n\nprint(factorial(5))</code></pre>",
+    "options": [
+      {
+        "text": "24",
+        "correct": false
+      },
+      {
+        "text": "120",
+        "correct": true
+      },
+      {
+        "text": "720",
+        "correct": false
+      },
+      {
+        "text": "RecursionError",
+        "correct": false
+      }
+    ],
+    "explanation": "factorial(5) is 5 * 4 * 3 * 2 * 1, which is 120."
+  },
+  {
+    "id": "q018",
+    "type": "mcq",
+    "title": "Negative factorial branch",
+    "source": "Lecture 8, slide page 16",
+    "prompt": "According to the lecture example, what happens when the user enters -7 in the factorial script?",
+    "options": [
+      {
+        "text": "It prints that factorial does not exist for negative numbers.",
+        "correct": true
+      },
+      {
+        "text": "It prints The factorial of -7 is 5040.",
+        "correct": false
+      },
+      {
+        "text": "It returns 1 because -7 <= 0.",
+        "correct": false
+      },
+      {
+        "text": "It installs a missing package.",
+        "correct": false
+      }
+    ],
+    "explanation": "The example checks if number < 0 before calling factorial and prints an error message for negative input."
+  },
+  {
+    "id": "q019",
+    "type": "mcq",
+    "title": "Fibonacci sequence",
+    "source": "Lecture 8, slide page 22",
+    "prompt": "Using the lecture's Fibonacci sequence where F0 = 0 and F1 = 1, what is fibonacci(6)?",
+    "options": [
+      {
+        "text": "5",
+        "correct": false
+      },
+      {
+        "text": "6",
+        "correct": false
+      },
+      {
+        "text": "8",
+        "correct": true
+      },
+      {
+        "text": "13",
+        "correct": false
+      }
+    ],
+    "explanation": "The sequence goes 0, 1, 1, 2, 3, 5, 8, so F6 is 8."
+  },
+  {
+    "id": "q020",
+    "type": "mcq",
+    "title": "Fibonacci base cases",
+    "source": "Lecture 8, slides pages 22-24",
+    "prompt": "What does this base case do in the Fibonacci function?<pre class=\"code-console\" aria-label=\"code snippet\"><code>if n &lt;= 1:\n    return n</code></pre>",
+    "options": [
+      {
+        "text": "It returns 0 for fibonacci(0) and 1 for fibonacci(1).",
+        "correct": true
+      },
+      {
+        "text": "It returns 1 for every value.",
+        "correct": false
+      },
+      {
+        "text": "It stops only when n is negative.",
+        "correct": false
+      },
+      {
+        "text": "It calls fibonacci(n-1) and fibonacci(n-2).",
+        "correct": false
+      }
+    ],
+    "explanation": "For n equal to 0 or 1, the function returns n directly. That prevents endless recursion."
+  },
+  {
+    "id": "q021",
+    "type": "mcq",
+    "title": "Fibonacci recursion",
+    "source": "Lecture 8, slide page 23",
+    "prompt": "What is the returned value of fibonacci(5) in the lecture example?",
+    "options": [
+      {
+        "text": "3",
+        "correct": false
+      },
+      {
+        "text": "5",
+        "correct": true
+      },
+      {
+        "text": "8",
+        "correct": false
+      },
+      {
+        "text": "13",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide's tree shows fibonacci(5) returns 5."
+  },
+  {
+    "id": "q022",
+    "type": "mcq",
+    "title": "Recursion unwind order",
+    "source": "Lecture 8, slide page 25",
+    "prompt": "For the lecture's test_recursion(5), what final result is returned?",
+    "options": [
+      {
+        "text": "5",
+        "correct": false
+      },
+      {
+        "text": "10",
+        "correct": false
+      },
+      {
+        "text": "15",
+        "correct": true
+      },
+      {
+        "text": "RecursionError",
+        "correct": false
+      }
+    ],
+    "explanation": "The function adds 5 + 4 + 3 + 2 + 1 + 0, so the final result is 15."
+  },
+  {
+    "id": "q023",
+    "type": "sequence",
+    "title": "Recursive output order",
+    "source": "Lecture 8, slide page 25",
+    "prompt": "Drag the printed output lines into the order produced by test_recursion(5).",
+    "items": [
+      "Value is 1 / Result is 1",
+      "Value is 2 / Result is 3",
+      "Value is 3 / Result is 6",
+      "Value is 4 / Result is 10",
+      "Value is 5 / Result is 15"
+    ],
+    "explanation": "The base case returns first, so the printed results appear while recursion unwinds from 1 back up to 5."
+  },
+  {
+    "id": "q024",
+    "type": "mcq",
+    "title": "Grade function ranges",
+    "source": "Lecture 8, slide page 26",
+    "prompt": "In the lecture's getGrade(num), what grade is returned for 90?",
+    "options": [
+      {
+        "text": "A+",
+        "correct": false
+      },
+      {
+        "text": "A",
+        "correct": true
+      },
+      {
+        "text": "B",
+        "correct": false
+      },
+      {
+        "text": "Invalid",
+        "correct": false
+      }
+    ],
+    "explanation": "The A+ condition is num <= 100 and num > 90. The next condition num <= 90 and num > 80 returns A, so exactly 90 is A."
+  },
+  {
+    "id": "q025",
+    "type": "mcq",
+    "title": "Continue loop",
+    "source": "Lecture 8, slide page 26",
+    "prompt": "In the grade example, why does entering y continue even though the code compares ans != 'Y'?",
+    "options": [
+      {
+        "text": "The input is converted with .upper(), so y becomes Y.",
+        "correct": true
+      },
+      {
+        "text": "Python treats y and Y as the same automatically.",
+        "correct": false
+      },
+      {
+        "text": "The loop ignores the answer.",
+        "correct": false
+      },
+      {
+        "text": "The function getGrade changes the answer.",
+        "correct": false
+      }
+    ],
+    "explanation": "The script uses ans = input(...).upper(), so lowercase y becomes uppercase Y before comparison."
+  },
+  {
+    "id": "q026",
+    "type": "mcq",
+    "title": "Lecture revision advice",
+    "source": "Lecture 8, slide page 20",
+    "prompt": "Which study action does the lecture explicitly recommend after class?",
+    "options": [
+      {
+        "text": "Revise this lecture note to fill gaps and increase retention.",
+        "correct": true
+      },
+      {
+        "text": "Skip the next lecture note until the quiz begins.",
+        "correct": false
+      },
+      {
+        "text": "Only memorize the screenshots.",
+        "correct": false
+      },
+      {
+        "text": "Uninstall Python packages after each class.",
+        "correct": false
+      }
+    ],
+    "explanation": "The homework slide says revising the lecture fills gaps, shows focus areas, increases retention, and transfers information to long-term memory."
+  },
+  {
+    "id": "q027",
+    "type": "mcq",
+    "title": "Modules",
+    "source": "Lecture 9, slide page 32",
+    "prompt": "What is a Python module, according to the lecture?",
+    "options": [
+      {
+        "text": "A set of code, usually functions, saved in a Python file.",
+        "correct": true
+      },
+      {
+        "text": "Only a GUI window.",
+        "correct": false
+      },
+      {
+        "text": "A package manager for installing libraries.",
+        "correct": false
+      },
+      {
+        "text": "A regular expression pattern.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide defines modules as sets of code saved in a Python file."
+  },
+  {
+    "id": "q028",
+    "type": "mcq",
+    "title": "Using imported modules",
+    "source": "Lecture 9, slide page 32",
+    "prompt": "Which pattern does the lecture show for calling a function from an imported module?",
+    "options": [
+      {
+        "text": "module.function()",
+        "correct": true
+      },
+      {
+        "text": "function.module()",
+        "correct": false
+      },
+      {
+        "text": "pip.module(function)",
+        "correct": false
+      },
+      {
+        "text": "module->function()",
+        "correct": false
+      }
+    ],
+    "explanation": "After import module, the slide shows calling code with module.function()."
+  },
+  {
+    "id": "q029",
+    "type": "mcq",
+    "title": "Imported file output",
+    "source": "Lecture 9, slide page 32",
+    "prompt": "A file named Lecture_09_02.py contains this line after importing Lecture_09_01.py:<pre class=\"code-console\" aria-label=\"code snippet\"><code>Lecture_09_01.print_grade(&quot;Rodrigo&quot;, 98)</code></pre>If print_grade prints the A+ branch for marks over 80, what output matches the slide?",
+    "options": [
+      {
+        "text": "Rodrigo you're awesome !!, you got 98",
+        "correct": true
+      },
+      {
+        "text": "Lanka you got 45",
+        "correct": false
+      },
+      {
+        "text": "Rods you're good, you got 75",
+        "correct": false
+      },
+      {
+        "text": "ModuleNotFoundError",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide's output shows Rodrigo receives the awesome message for 98."
+  },
+  {
+    "id": "q030",
+    "type": "mcq",
+    "title": "__pycache__",
+    "source": "Lecture 9, slide page 33",
+    "prompt": "When does Python create a __pycache__ directory in the lecture explanation?",
+    "options": [
+      {
+        "text": "When the interpreter imports a module.",
+        "correct": true
+      },
+      {
+        "text": "Only when pip is upgraded.",
+        "correct": false
+      },
+      {
+        "text": "Whenever a Tkinter window closes.",
+        "correct": false
+      },
+      {
+        "text": "Only after regex validation fails.",
+        "correct": false
+      }
+    ],
+    "explanation": "__pycache__ is created by the Python interpreter when it imports a module."
+  },
+  {
+    "id": "q031",
+    "type": "matching",
+    "title": "Common built-in modules",
+    "source": "Lecture 9, slide page 33",
+    "prompt": "Match each module to the description used in the lecture.",
+    "pairs": [
+      {
+        "left": "random",
+        "right": "Offers functions for generating random numbers."
+      },
+      {
+        "left": "math",
+        "right": "Provides mathematical functions such as trigonometric, logarithmic, and exponential functions."
+      },
+      {
+        "left": "datetime",
+        "right": "Allows working with dates and times."
+      }
+    ],
+    "explanation": "The lecture highlights random, math, and datetime as common module examples."
+  },
+  {
+    "id": "q032",
+    "type": "matching",
+    "title": "Modules, packages, libraries, frameworks",
+    "source": "Lecture 9, slide page 34",
+    "prompt": "Match each resource type to the lecture's description.",
+    "pairs": [
+      {
+        "left": "module",
+        "right": "Code saved in a Python file."
+      },
+      {
+        "left": "package",
+        "right": "A collection of modules."
+      },
+      {
+        "left": "library",
+        "right": "A collection of packages."
+      },
+      {
+        "left": "framework",
+        "right": "A foundation that helps the development process."
+      }
+    ],
+    "explanation": "The classification slide builds upward from modules to packages, libraries, and frameworks."
+  },
+  {
+    "id": "q033",
+    "type": "matching",
+    "title": "Python resource examples",
+    "source": "Lecture 9, slide page 34",
+    "prompt": "Match each example to the category emphasized in the slide.",
+    "pairs": [
+      {
+        "left": "numpy",
+        "right": "A package for scientific computing."
+      },
+      {
+        "left": "pandas",
+        "right": "A package for tabular data, time series, and matrix data."
+      },
+      {
+        "left": "BeautifulSoup",
+        "right": "A library for getting data from the web."
+      },
+      {
+        "left": "Matplotlib",
+        "right": "A library for generating data visualizations."
+      },
+      {
+        "left": "Django",
+        "right": "A framework for web development."
+      }
+    ],
+    "explanation": "These examples appear on the lecture's classification slide."
+  },
+  {
+    "id": "q034",
+    "type": "mcq",
+    "title": "Built-in vs third-party resources",
+    "source": "Lecture 9, slide page 35",
+    "prompt": "Which command style matches a third-party resource that must be installed on demand?",
+    "options": [
+      {
+        "text": "import name",
+        "correct": false
+      },
+      {
+        "text": "pip install name",
+        "correct": true
+      },
+      {
+        "text": "def install(name):",
+        "correct": false
+      },
+      {
+        "text": "python -m tkinter",
+        "correct": false
+      }
+    ],
+    "explanation": "The phone-app analogy slide contrasts resources that come with Python via import with third-party resources installed with pip."
+  },
+  {
+    "id": "q035",
+    "type": "matching",
+    "title": "Listing packages",
+    "source": "Lecture 9, slide page 37",
+    "prompt": "Match the pip command with what the lecture says it lists.",
+    "pairs": [
+      {
+        "left": "pip list",
+        "right": "Lists all installed packages."
+      },
+      {
+        "left": "pip freeze",
+        "right": "Lists only pip-installed packages in freeze-style format."
+      }
+    ],
+    "explanation": "The slide directly compares pip list and pip freeze."
+  },
+  {
+    "id": "q036",
+    "type": "mcq",
+    "title": "PyPI",
+    "source": "Lecture 9, slide page 38",
+    "prompt": "What is PyPI in the lecture?",
+    "options": [
+      {
+        "text": "The Python Package Index where packages are registered.",
+        "correct": true
+      },
+      {
+        "text": "A Tkinter geometry manager.",
+        "correct": false
+      },
+      {
+        "text": "A function for finding all regex matches.",
+        "correct": false
+      },
+      {
+        "text": "A recursion base case.",
+        "correct": false
+      }
+    ],
+    "explanation": "PyPI is the Python Package Index, the registry from which pip can install packages."
+  },
+  {
+    "id": "q037",
+    "type": "fill",
+    "title": "pip install latest version",
+    "source": "Lecture 9, slide page 38",
+    "prompt": "Complete the command pattern for installing the latest version of one package.",
+    "sentences": [
+      {
+        "before": "",
+        "after": " <package>",
+        "answers": [
+          "pip install"
+        ]
+      }
+    ],
+    "explanation": "The slide shows pip install <package> for installing the latest version by package name."
+  },
+  {
+    "id": "q038",
+    "type": "mcq",
+    "title": "Install multiple packages",
+    "source": "Lecture 9, slide page 38",
+    "prompt": "Which command installs numpy, Django, and requests at the same time?",
+    "options": [
+      {
+        "text": "pip install numpy Django requests",
+        "correct": true
+      },
+      {
+        "text": "pip list numpy Django requests",
+        "correct": false
+      },
+      {
+        "text": "pip freeze numpy Django requests",
+        "correct": false
+      },
+      {
+        "text": "pip uninstall numpy Django requests",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide shows multiple packages can be installed in one command after pip install."
+  },
+  {
+    "id": "q039",
+    "type": "mcq",
+    "title": "Specific package version",
+    "source": "Lecture 9, slide page 38",
+    "prompt": "Which command follows the lecture's version-specific install pattern?",
+    "options": [
+      {
+        "text": "pip install Django==5.0",
+        "correct": true
+      },
+      {
+        "text": "pip install Django=5.0",
+        "correct": false
+      },
+      {
+        "text": "pip version Django 5.0",
+        "correct": false
+      },
+      {
+        "text": "pip install --version Django 5.0",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide uses double equals, as in pip install <package>==<version>."
+  },
+  {
+    "id": "q040",
+    "type": "mcq",
+    "title": "Upgrade package",
+    "source": "Lecture 9, slide page 38",
+    "prompt": "Which pair of commands are both shown for upgrading a Python package?",
+    "options": [
+      {
+        "text": "pip install --upgrade <package> and pip install -U <package>",
+        "correct": true
+      },
+      {
+        "text": "pip upgrade <package> and pip up <package>",
+        "correct": false
+      },
+      {
+        "text": "pip update <package> and pip -update <package>",
+        "correct": false
+      },
+      {
+        "text": "pip install == <package> and pip install latest <package>",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide gives both --upgrade and -U forms."
+  },
+  {
+    "id": "q041",
+    "type": "mcq",
+    "title": "Uninstall package",
+    "source": "Lecture 9, slide page 38",
+    "prompt": "Which command pattern removes a package?",
+    "options": [
+      {
+        "text": "pip uninstall <package>",
+        "correct": true
+      },
+      {
+        "text": "pip remove-package <package>",
+        "correct": false
+      },
+      {
+        "text": "pip freeze <package>",
+        "correct": false
+      },
+      {
+        "text": "pip delete --all",
+        "correct": false
+      }
+    ],
+    "explanation": "The lecture lists pip uninstall <package>, including the option to list several packages after uninstall."
+  },
+  {
+    "id": "q042",
+    "type": "mcq",
+    "title": "Running pip from command line",
+    "source": "Lecture 9, slide page 39",
+    "prompt": "Which Windows command style does the lecture show for installing a package?",
+    "options": [
+      {
+        "text": "py -m pip install \"packageName\"",
+        "correct": true
+      },
+      {
+        "text": "python3 -m pip install \"packageName\"",
+        "correct": false
+      },
+      {
+        "text": "brew install packageName",
+        "correct": false
+      },
+      {
+        "text": "tk.install(\"packageName\")",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide shows py -m pip install on Windows and python3 -m pip install on macOS."
+  },
+  {
+    "id": "q043",
+    "type": "mcq",
+    "title": "Install before import",
+    "source": "Lecture 9, slide page 40",
+    "prompt": "According to the numpy slide, what must usually happen before importing a third-party package like numpy?",
+    "options": [
+      {
+        "text": "Install the package.",
+        "correct": true
+      },
+      {
+        "text": "Create a Tkinter window.",
+        "correct": false
+      },
+      {
+        "text": "Write a recursive base case.",
+        "correct": false
+      },
+      {
+        "text": "Run re.findall first.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide labels the order as install numpy, then import numpy."
+  },
+  {
+    "id": "q044",
+    "type": "mcq",
+    "title": "Tkinter basics",
+    "source": "Lecture 9, slide page 42",
+    "prompt": "Which statement about Tkinter matches the lecture?",
+    "options": [
+      {
+        "text": "Tkinter is built into the Python standard library.",
+        "correct": true
+      },
+      {
+        "text": "Tkinter can only be installed from PyPI.",
+        "correct": false
+      },
+      {
+        "text": "Tkinter is a regular expression engine.",
+        "correct": false
+      },
+      {
+        "text": "Tkinter is a package for data frames.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide says Tkinter is built into the Python standard library and stands for Tk interface."
+  },
+  {
+    "id": "q045",
+    "type": "mcq",
+    "title": "Tkinter window size",
+    "source": "Lecture 9, slide page 42",
+    "prompt": "Which line sets the lecture example window size to 300 by 300?",
+    "options": [
+      {
+        "text": "window.geometry('300x300')",
+        "correct": true
+      },
+      {
+        "text": "window.size(300, 300)",
+        "correct": false
+      },
+      {
+        "text": "window.title('300x300')",
+        "correct": false
+      },
+      {
+        "text": "window.mainloop('300x300')",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide uses window.geometry('300x300') after setting the title."
+  },
+  {
+    "id": "q046",
+    "type": "mcq",
+    "title": "Check Tkinter",
+    "source": "Lecture 9, slide page 42",
+    "prompt": "Which command does the slide show for checking whether Tkinter is installed?",
+    "options": [
+      {
+        "text": "python -m tkinter",
+        "correct": true
+      },
+      {
+        "text": "pip list tkinter",
+        "correct": false
+      },
+      {
+        "text": "tkinter --version",
+        "correct": false
+      },
+      {
+        "text": "python tkinter.py --check",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide says to check Tkinter with python -m tkinter, or install tk via pip if preferred."
+  },
+  {
+    "id": "q047",
+    "type": "mcq",
+    "title": "pack and grid warning",
+    "source": "Lecture 9, slide page 43",
+    "prompt": "What warning does the positioning slide give?",
+    "options": [
+      {
+        "text": "Never use both grid() and pack() in the same window or frame.",
+        "correct": true
+      },
+      {
+        "text": "Never use labels in a GUI.",
+        "correct": false
+      },
+      {
+        "text": "Never import tkinter as tk.",
+        "correct": false
+      },
+      {
+        "text": "Never set row and column values.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide prominently warns not to mix grid() and pack() in the same window or frame."
+  },
+  {
+    "id": "q048",
+    "type": "mcq",
+    "title": "grid placement",
+    "source": "Lecture 9, slide page 43",
+    "prompt": "In the lecture's grid example, where is this label placed?<pre class=\"code-console\" aria-label=\"code snippet\"><code>myLabel2 = tk.Label(window, text=&quot;Section 4 goes here&quot;)\nmyLabel2.grid(row=1, column=1)</code></pre>",
+    "options": [
+      {
+        "text": "Row 1, column 1",
+        "correct": true
+      },
+      {
+        "text": "Row 0, column 0",
+        "correct": false
+      },
+      {
+        "text": "Packed below all widgets",
+        "correct": false
+      },
+      {
+        "text": "It is not displayed",
+        "correct": false
+      }
+    ],
+    "explanation": "grid(row=1, column=1) places the widget at row 1 and column 1."
+  },
+  {
+    "id": "q049",
+    "type": "mcq",
+    "title": "LabelFrame and Entry",
+    "source": "Lecture 9, slide page 44",
+    "prompt": "What does myData.get() retrieve in the button-click example?",
+    "options": [
+      {
+        "text": "The current text inside the Entry widget.",
+        "correct": true
+      },
+      {
+        "text": "The window's title.",
+        "correct": false
+      },
+      {
+        "text": "The LabelFrame padding value.",
+        "correct": false
+      },
+      {
+        "text": "The row number of the button.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide's button callback uses myData.get() to read the number entered into the Entry widget."
+  },
+  {
+    "id": "q050",
+    "type": "mcq",
+    "title": "Button command callback",
+    "source": "Lecture 9, slide page 44",
+    "prompt": "Which Button option connects the button to the btnClick function?",
+    "options": [
+      {
+        "text": "command=btnClick",
+        "correct": true
+      },
+      {
+        "text": "onclick=btnClick",
+        "correct": false
+      },
+      {
+        "text": "click=btnClick()",
+        "correct": false
+      },
+      {
+        "text": "function='btnClick'",
+        "correct": false
+      }
+    ],
+    "explanation": "Tkinter Button uses command=btnClick to call the function when clicked."
+  },
+  {
+    "id": "q051",
+    "type": "mcq",
+    "title": "Radiobutton StringVar",
+    "source": "Lecture 9, slide page 45",
+    "prompt": "In the radiobutton slide, what is the purpose of var3 = StringVar()?",
+    "options": [
+      {
+        "text": "It stores the selected radiobutton's string value.",
+        "correct": true
+      },
+      {
+        "text": "It creates five separate windows.",
+        "correct": false
+      },
+      {
+        "text": "It forces every radiobutton to be selected.",
+        "correct": false
+      },
+      {
+        "text": "It converts pack() into grid().",
+        "correct": false
+      }
+    ],
+    "explanation": "The radiobuttons share variable=var3, so var3.get() returns the selected value."
+  },
+  {
+    "id": "q052",
+    "type": "mcq",
+    "title": "Radiobutton default",
+    "source": "Lecture 9, slide page 45",
+    "prompt": "What does this line do in the lecture example?<pre class=\"code-console\" aria-label=\"code snippet\"><code>var3.set(&quot;Oita&quot;)</code></pre>",
+    "options": [
+      {
+        "text": "It makes Oita the initially selected radiobutton.",
+        "correct": true
+      },
+      {
+        "text": "It disables the Oita radiobutton.",
+        "correct": false
+      },
+      {
+        "text": "It changes the window title to Oita.",
+        "correct": false
+      },
+      {
+        "text": "It imports Oita as a package.",
+        "correct": false
+      }
+    ],
+    "explanation": "Setting the StringVar to Oita selects the radiobutton whose value is Oita."
+  },
+  {
+    "id": "q053",
+    "type": "mcq",
+    "title": "Checkbutton IntVar",
+    "source": "Lecture 9, slide page 46",
+    "prompt": "In the IntVar checkbutton example, what does a selected checkbox return through .get()?",
+    "options": [
+      {
+        "text": "1",
+        "correct": true
+      },
+      {
+        "text": "0",
+        "correct": false
+      },
+      {
+        "text": "The label text only",
+        "correct": false
+      },
+      {
+        "text": "None",
+        "correct": false
+      }
+    ],
+    "explanation": "IntVar checkbuttons return 1 when selected and 0 when not selected."
+  },
+  {
+    "id": "q054",
+    "type": "mcq",
+    "title": "Checkbutton StringVar",
+    "source": "Lecture 9, slide page 47",
+    "prompt": "What do onvalue and offvalue control in the StringVar checkbutton example?",
+    "options": [
+      {
+        "text": "The string stored when the checkbutton is selected or cleared.",
+        "correct": true
+      },
+      {
+        "text": "The row and column of the checkbutton.",
+        "correct": false
+      },
+      {
+        "text": "The color of the LabelFrame only.",
+        "correct": false
+      },
+      {
+        "text": "The pip package version.",
+        "correct": false
+      }
+    ],
+    "explanation": "The StringVar version assigns city names when selected and an empty string when offvalue is ''."
+  },
+  {
+    "id": "q055",
+    "type": "mcq",
+    "title": "Tkinter color chart",
+    "source": "Lecture 9, slide page 53",
+    "prompt": "Why does the further-study slide include a Tkinter color chart?",
+    "options": [
+      {
+        "text": "To choose valid color names for GUI options such as bg and fg.",
+        "correct": true
+      },
+      {
+        "text": "To choose regex metacharacters.",
+        "correct": false
+      },
+      {
+        "text": "To install numpy colors through pip.",
+        "correct": false
+      },
+      {
+        "text": "To define recursive base cases.",
+        "correct": false
+      }
+    ],
+    "explanation": "The color chart is a reference for usable Tkinter color names."
+  },
+  {
+    "id": "q056",
+    "type": "mcq",
+    "title": "pip definition",
+    "source": "Lecture 9, slide page 55",
+    "prompt": "What is pip?",
+    "options": [
+      {
+        "text": "A package manager for Python packages.",
+        "correct": true
+      },
+      {
+        "text": "A Tkinter geometry manager.",
+        "correct": false
+      },
+      {
+        "text": "A string variable type.",
+        "correct": false
+      },
+      {
+        "text": "A regex function that returns all matches.",
+        "correct": false
+      }
+    ],
+    "explanation": "The lecture describes pip as a package manager that installs additional libraries and packages."
+  },
+  {
+    "id": "q057",
+    "type": "mcq",
+    "title": "pip included by default",
+    "source": "Lecture 9, slide page 55",
+    "prompt": "According to the lecture, pip is included by default starting with which Python version?",
+    "options": [
+      {
+        "text": "3.4 or later",
+        "correct": true
+      },
+      {
+        "text": "2.0 or later",
+        "correct": false
+      },
+      {
+        "text": "Only 3.12",
+        "correct": false
+      },
+      {
+        "text": "Only if Tkinter is installed",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide notes that if you have Python 3.4 or later, pip is included by default."
+  },
+  {
+    "id": "q058",
+    "type": "mcq",
+    "title": "pip version shortcut",
+    "source": "Lecture 9, slide page 55",
+    "prompt": "Which command is shown as a shortcut equivalent for checking pip version?",
+    "options": [
+      {
+        "text": "pip -V",
+        "correct": true
+      },
+      {
+        "text": "pip -U",
+        "correct": false
+      },
+      {
+        "text": "pip -R",
+        "correct": false
+      },
+      {
+        "text": "pip -G",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide shows both pip --version and pip -V displaying version information."
+  },
+  {
+    "id": "q059",
+    "type": "mcq",
+    "title": "ensurepip",
+    "source": "Lecture 9, slide page 57",
+    "prompt": "What does python -m ensurepip do according to the lecture?",
+    "options": [
+      {
+        "text": "Installs pip if it is not already installed; otherwise does nothing.",
+        "correct": true
+      },
+      {
+        "text": "Uninstalls all packages.",
+        "correct": false
+      },
+      {
+        "text": "Lists all Tkinter colors.",
+        "correct": false
+      },
+      {
+        "text": "Creates a regex pattern.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide says ensurepip installs pip if missing and otherwise leaves the existing install alone."
+  },
+  {
+    "id": "q060",
+    "type": "mcq",
+    "title": "Upgrade pip",
+    "source": "Lecture 9, slide page 59",
+    "prompt": "Which command from the slide upgrades pip on Windows?",
+    "options": [
+      {
+        "text": "python.exe -m pip install --upgrade pip",
+        "correct": true
+      },
+      {
+        "text": "python.exe pip --upgrade",
+        "correct": false
+      },
+      {
+        "text": "pip ensure --upgrade",
+        "correct": false
+      },
+      {
+        "text": "pip install pip==old",
+        "correct": false
+      }
+    ],
+    "explanation": "The final pip slide shows python.exe -m pip install --upgrade pip."
+  },
+  {
+    "id": "q061",
+    "type": "mcq",
+    "title": "Data validation",
+    "source": "Lecture 10, slide page 65",
+    "prompt": "What is data validation?",
+    "options": [
+      {
+        "text": "Ensuring the accuracy and quality of data.",
+        "correct": true
+      },
+      {
+        "text": "Creating a GUI window.",
+        "correct": false
+      },
+      {
+        "text": "Installing third-party packages.",
+        "correct": false
+      },
+      {
+        "text": "Calling a function before it is defined.",
+        "correct": false
+      }
+    ],
+    "explanation": "The validation slide defines it as ensuring the accuracy and quality of data."
+  },
+  {
+    "id": "q062",
+    "type": "matching",
+    "title": "Validation checks",
+    "source": "Lecture 10, slide page 65",
+    "prompt": "Match each validation check to the lecture's description.",
+    "pairs": [
+      {
+        "left": "Data Type Check",
+        "right": "Confirms that data has the specified data type and format."
+      },
+      {
+        "left": "Code Check",
+        "right": "Ensures that data follows certain code rules."
+      },
+      {
+        "left": "Format Check",
+        "right": "Validates the data's structure and format."
+      },
+      {
+        "left": "Range Check",
+        "right": "Confirms that data has the specified value range."
+      },
+      {
+        "left": "Uniqueness Check",
+        "right": "Checks for unique data entries."
+      }
+    ],
+    "explanation": "The slide lists several checks used to ensure logical consistency of data."
+  },
+  {
+    "id": "q063",
+    "type": "mcq",
+    "title": "RegEx module",
+    "source": "Lecture 10, slide page 67",
+    "prompt": "Which built-in Python package is used for regular expressions in the lecture?",
+    "options": [
+      {
+        "text": "re",
+        "correct": true
+      },
+      {
+        "text": "regexlib",
+        "correct": false
+      },
+      {
+        "text": "tk",
+        "correct": false
+      },
+      {
+        "text": "pip",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide says RegEx is a built-in package in Python called re."
+  },
+  {
+    "id": "q064",
+    "type": "matching",
+    "title": "RegEx functions",
+    "source": "Lecture 10, slide page 67",
+    "prompt": "Match each re function to its lecture description.",
+    "pairs": [
+      {
+        "left": "search",
+        "right": "Returns a Match object if there is a match anywhere in the string."
+      },
+      {
+        "left": "split",
+        "right": "Returns a list where the string has been split at each match."
+      },
+      {
+        "left": "sub",
+        "right": "Replaces one or many matches with a string."
+      },
+      {
+        "left": "findall",
+        "right": "Returns a list containing all matches."
+      }
+    ],
+    "explanation": "These four function descriptions are shown in the RegEx module table."
+  },
+  {
+    "id": "q065",
+    "type": "mcq",
+    "title": "re.search and group",
+    "source": "Lecture 10, slide page 67",
+    "prompt": "What is printed by result2?<pre class=\"code-console\" aria-label=\"code snippet\"><code>data = &quot;Whoever said that money can&#x27;t buy happiness, simply didn&#x27;t know where to go shopping!&quot;\nresult2 = re.search(&quot;money&quot;, data).group()\nprint(result2)</code></pre>",
+    "options": [
+      {
+        "text": "money",
+        "correct": true
+      },
+      {
+        "text": "None",
+        "correct": false
+      },
+      {
+        "text": "<re.Match object>",
+        "correct": false
+      },
+      {
+        "text": "happiness",
+        "correct": false
+      }
+    ],
+    "explanation": "search finds the word money, and group() returns the matched text."
+  },
+  {
+    "id": "q066",
+    "type": "mcq",
+    "title": "No regex match",
+    "source": "Lecture 10, slide page 67",
+    "prompt": "What is printed here?<pre class=\"code-console\" aria-label=\"code snippet\"><code>data = &quot;Whoever said that money can&#x27;t buy happiness, simply didn&#x27;t know where to go shopping!&quot;\nresult3 = re.search(&quot;happy&quot;, data)\nprint(result3)</code></pre>",
+    "options": [
+      {
+        "text": "happy",
+        "correct": false
+      },
+      {
+        "text": "happiness",
+        "correct": false
+      },
+      {
+        "text": "None",
+        "correct": true
+      },
+      {
+        "text": "True",
+        "correct": false
+      }
+    ],
+    "explanation": "The exact string happy does not appear as a separate substring in the shown example, so search returns None."
+  },
+  {
+    "id": "q067",
+    "type": "mcq",
+    "title": "re.split",
+    "source": "Lecture 10, slide page 68",
+    "prompt": "What does re.split('Why', data) do in the lecture example?",
+    "options": [
+      {
+        "text": "Splits the string at every occurrence of Why.",
+        "correct": true
+      },
+      {
+        "text": "Replaces every Why with an empty string.",
+        "correct": false
+      },
+      {
+        "text": "Returns only the first Why.",
+        "correct": false
+      },
+      {
+        "text": "Counts how many uppercase letters are present.",
+        "correct": false
+      }
+    ],
+    "explanation": "split returns a list of pieces separated at each match."
+  },
+  {
+    "id": "q068",
+    "type": "mcq",
+    "title": "Escaping a period",
+    "source": "Lecture 10, slide page 68",
+    "prompt": "Why does the slide use re.split('\\\\.', data) to split sentences?",
+    "options": [
+      {
+        "text": "Because . is a regex metacharacter, so \\. means a literal period.",
+        "correct": true
+      },
+      {
+        "text": "Because Python cannot read normal periods.",
+        "correct": false
+      },
+      {
+        "text": "Because split requires two backslashes for every letter.",
+        "correct": false
+      },
+      {
+        "text": "Because \\. matches only digits.",
+        "correct": false
+      }
+    ],
+    "explanation": "In regex, . means any character. Escaping it with a backslash makes it match an actual period."
+  },
+  {
+    "id": "q069",
+    "type": "mcq",
+    "title": "re.sub count",
+    "source": "Lecture 10, slide page 69",
+    "prompt": "What does count=2 mean in this replacement?<pre class=\"code-console\" aria-label=\"code snippet\"><code>re.sub(&quot;cold&quot;, &quot;hot&quot;, data, count=2)</code></pre>",
+    "options": [
+      {
+        "text": "Replace only the first two matches.",
+        "correct": true
+      },
+      {
+        "text": "Replace the last two matches only.",
+        "correct": false
+      },
+      {
+        "text": "Repeat the entire string twice.",
+        "correct": false
+      },
+      {
+        "text": "Return two lists.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide comments that count=2 replaces the first two words that match."
+  },
+  {
+    "id": "q070",
+    "type": "mcq",
+    "title": "re.sub without enough matches",
+    "source": "Lecture 10, slide page 69",
+    "prompt": "If count=10 but the string contains fewer than 10 matches, what happens?",
+    "options": [
+      {
+        "text": "All available matches are replaced.",
+        "correct": true
+      },
+      {
+        "text": "Python raises an error because count is too high.",
+        "correct": false
+      },
+      {
+        "text": "No matches are replaced.",
+        "correct": false
+      },
+      {
+        "text": "Only the tenth match is replaced.",
+        "correct": false
+      }
+    ],
+    "explanation": "count is a maximum number of replacements. If fewer matches exist, all those matches can be replaced."
+  },
+  {
+    "id": "q071",
+    "type": "mcq",
+    "title": "findall result",
+    "source": "Lecture 10, slide page 70",
+    "prompt": "What is printed by result1 in the lecture's findall example?<pre class=\"code-console\" aria-label=\"code snippet\"><code>data = &quot;Why do we put suits in a garment bag and put garments in a suitcase. why why why, I dont know why?&quot;\nresult1 = re.findall(&quot;put&quot;, data)\nprint(result1)</code></pre>",
+    "options": [
+      {
+        "text": "['put', 'put']",
+        "correct": true
+      },
+      {
+        "text": "put put put put",
+        "correct": false
+      },
+      {
+        "text": "4",
+        "correct": false
+      },
+      {
+        "text": "None",
+        "correct": false
+      }
+    ],
+    "explanation": "findall returns a list containing each exact match of put. The word put appears twice."
+  },
+  {
+    "id": "q072",
+    "type": "mcq",
+    "title": "Counting findall",
+    "source": "Lecture 10, slide page 70",
+    "prompt": "What does len(re.findall('why', data)) print in the lecture example?",
+    "options": [
+      {
+        "text": "2",
+        "correct": false
+      },
+      {
+        "text": "3",
+        "correct": false
+      },
+      {
+        "text": "4",
+        "correct": true
+      },
+      {
+        "text": "5",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide's output for the count is 4."
+  },
+  {
+    "id": "q073",
+    "type": "mcq",
+    "title": "Raw strings",
+    "source": "Lecture 10, slide page 72",
+    "prompt": "What does the r mean in a Python string such as r'\\bMy'?",
+    "options": [
+      {
+        "text": "Raw string: backslashes are treated literally for the regex pattern.",
+        "correct": true
+      },
+      {
+        "text": "Recursive string: the pattern calls itself.",
+        "correct": false
+      },
+      {
+        "text": "Random string: the pattern changes each run.",
+        "correct": false
+      },
+      {
+        "text": "Required string: the pattern cannot be empty.",
+        "correct": false
+      }
+    ],
+    "explanation": "The slide says r means raw string, which is especially useful for regex backslash sequences."
+  },
+  {
+    "id": "q074",
+    "type": "mcq",
+    "title": "Word boundary beginning",
+    "source": "Lecture 10, slide page 72",
+    "prompt": "What does r'\\bMy' find in the lecture example?",
+    "options": [
+      {
+        "text": "My only at the beginning of a word.",
+        "correct": true
+      },
+      {
+        "text": "My only at the end of a word.",
+        "correct": false
+      },
+      {
+        "text": "Any digit.",
+        "correct": false
+      },
+      {
+        "text": "Any character except newline.",
+        "correct": false
+      }
+    ],
+    "explanation": "\\b is a word boundary. Placing it before My means My must start at a word boundary."
+  },
+  {
+    "id": "q075",
+    "type": "mcq",
+    "title": "End-of-word boundary",
+    "source": "Lecture 10, slide page 72",
+    "prompt": "What does r'is\\b' check?",
+    "options": [
+      {
+        "text": "is at the end of a word.",
+        "correct": true
+      },
+      {
+        "text": "is at the beginning of a word.",
+        "correct": false
+      },
+      {
+        "text": "Any non-digit.",
+        "correct": false
+      },
+      {
+        "text": "A literal backslash followed by b.",
+        "correct": false
+      }
+    ],
+    "explanation": "The boundary after is requires the match to end at a word boundary."
+  },
+  {
+    "id": "q076",
+    "type": "mcq",
+    "title": "Digit metacharacter",
+    "source": "Lecture 10, slide page 72",
+    "prompt": "Which pattern from the slide finds every digit character?",
+    "options": [
+      {
+        "text": "\\d",
+        "correct": true
+      },
+      {
+        "text": "\\D",
+        "correct": false
+      },
+      {
+        "text": "\\w",
+        "correct": false
+      },
+      {
+        "text": "\\s",
+        "correct": false
+      }
+    ],
+    "explanation": "\\d returns matches where the string contains digits from 0 to 9."
+  },
+  {
+    "id": "q077",
+    "type": "mcq",
+    "title": "Three digits",
+    "source": "Lecture 10, slide page 72",
+    "prompt": "Which regex pattern finds groups of exactly three digits in the slide example?",
+    "options": [
+      {
+        "text": "\\d{3}",
+        "correct": true
+      },
+      {
+        "text": "\\d(3)",
+        "correct": false
+      },
+      {
+        "text": "\\d[3]",
+        "correct": false
+      },
+      {
+        "text": "\\D{3}",
+        "correct": false
+      }
+    ],
+    "explanation": "{3} means exactly three occurrences of the previous pattern, so \\d{3} matches three digits."
+  },
+  {
+    "id": "q078",
+    "type": "mcq",
+    "title": "Digit range set",
+    "source": "Lecture 10, slide page 72",
+    "prompt": "Which pattern finds three-character digit groups using only digits 0 through 3?",
+    "options": [
+      {
+        "text": "[0-3]{3}",
+        "correct": true
+      },
+      {
+        "text": "[3-0]{3}",
+        "correct": false
+      },
+      {
+        "text": "\\d[0-3]",
+        "correct": false
+      },
+      {
+        "text": "0-3{3}",
+        "correct": false
+      }
+    ],
+    "explanation": "[0-3] limits each digit to 0, 1, 2, or 3; {3} repeats that three times."
+  },
+  {
+    "id": "q079",
+    "type": "mcq",
+    "title": "Dot metacharacter",
+    "source": "Lecture 10, slide page 73",
+    "prompt": "Given the lecture data string, which list matches re.findall(r'b.g', data)?",
+    "options": [
+      {
+        "text": "['big', 'big', 'beg', 'big']",
+        "correct": true
+      },
+      {
+        "text": "['bigger', 'beggar', 'bottles']",
+        "correct": false
+      },
+      {
+        "text": "['brother', 'became']",
+        "correct": false
+      },
+      {
+        "text": "[]",
+        "correct": false
+      }
+    ],
+    "explanation": "The dot matches one character, so b.g catches big and beg-sized matches."
+  },
+  {
+    "id": "q080",
+    "type": "mcq",
+    "title": "Exact repetitions",
+    "source": "Lecture 10, slide page 73",
+    "prompt": "What does r'b.{2}g' match in the lecture's b-g example?",
+    "options": [
+      {
+        "text": "Four-character pieces starting with b, then any two characters, then g.",
+        "correct": true
+      },
+      {
+        "text": "Only the word big.",
+        "correct": false
+      },
+      {
+        "text": "A literal string b.{2}g.",
+        "correct": false
+      },
+      {
+        "text": "Only words that end with b.",
+        "correct": false
+      }
+    ],
+    "explanation": ".{2} means exactly two arbitrary characters between b and g."
+  },
+  {
+    "id": "q081",
+    "type": "mcq",
+    "title": "Alternation",
+    "source": "Lecture 10, slide page 73",
+    "prompt": "What is the role of | in a regex pattern such as r'bigger|big|b.{2}g'?",
+    "options": [
+      {
+        "text": "Either/or: match one alternative or another.",
+        "correct": true
+      },
+      {
+        "text": "Start of string.",
+        "correct": false
+      },
+      {
+        "text": "End of string.",
+        "correct": false
+      },
+      {
+        "text": "Zero or more repeats.",
+        "correct": false
+      }
+    ],
+    "explanation": "The metacharacter table describes | as either/or."
+  },
+  {
+    "id": "q082",
+    "type": "mcq",
+    "title": "Extract domains with @",
+    "source": "Lecture 10, slide page 76",
+    "prompt": "What kind of results does this pattern return?<pre class=\"code-console\" aria-label=\"code snippet\"><code>re.findall(r&quot;@([a-z]+)&quot;, data)</code></pre>",
+    "options": [
+      {
+        "text": "Domain names without the @ symbol, such as yahoo and apu.",
+        "correct": true
+      },
+      {
+        "text": "Full email addresses only.",
+        "correct": false
+      },
+      {
+        "text": "Phone numbers only.",
+        "correct": false
+      },
+      {
+        "text": "Only student ID numbers.",
+        "correct": false
+      }
+    ],
+    "explanation": "The parentheses capture the lowercase letters after @, so the returned list excludes the @ symbol."
+  },
+  {
+    "id": "q083",
+    "type": "mcq",
+    "title": "Removing duplicates",
+    "source": "Lecture 10, slide page 76",
+    "prompt": "Why does the slide use set(result3) after finding domains?",
+    "options": [
+      {
+        "text": "To remove duplicate domain names.",
+        "correct": true
+      },
+      {
+        "text": "To sort the data by phone number.",
+        "correct": false
+      },
+      {
+        "text": "To convert email addresses into Tkinter colors.",
+        "correct": false
+      },
+      {
+        "text": "To force regex to match uppercase only.",
+        "correct": false
+      }
+    ],
+    "explanation": "A set stores each unique value once, so repeated domains are removed."
+  },
+  {
+    "id": "q084",
+    "type": "mcq",
+    "title": "Email address extraction",
+    "source": "Lecture 10, slides pages 76-77",
+    "prompt": "Which pattern style from the lecture extracts full email addresses like emiko@yahoo.com?",
+    "options": [
+      {
+        "text": "[\\w.]+@[\\w.]+",
+        "correct": true
+      },
+      {
+        "text": "\\d{8}",
+        "correct": false
+      },
+      {
+        "text": "\\d{3}-\\d{4}-\\d{4}",
+        "correct": false
+      },
+      {
+        "text": "[0-5][0-9]",
+        "correct": false
+      }
+    ],
+    "explanation": "[\\w.]+@[\\w.]+ matches word/dot text, then @, then word/dot text."
+  },
+  {
+    "id": "q085",
+    "type": "mcq",
+    "title": "APU email extraction",
+    "source": "Lecture 10, slide page 77",
+    "prompt": "Which pattern from the lecture targets APU email addresses?",
+    "options": [
+      {
+        "text": "[\\w]+@apu.ac.jp",
+        "correct": true
+      },
+      {
+        "text": "[\\w]+@yahoo[\\w.]+",
+        "correct": false
+      },
+      {
+        "text": "\\d{3}-\\d{4}-\\d{4}",
+        "correct": false
+      },
+      {
+        "text": "\\Bapu",
+        "correct": false
+      }
+    ],
+    "explanation": "The APU-specific pattern looks for word characters before @apu.ac.jp."
+  },
+  {
+    "id": "q086",
+    "type": "mcq",
+    "title": "Yahoo email extraction",
+    "source": "Lecture 10, slide page 77",
+    "prompt": "Which pattern targets Yahoo email addresses in the slide?",
+    "options": [
+      {
+        "text": "[\\w]+@yahoo[\\w.]+",
+        "correct": true
+      },
+      {
+        "text": "[\\w]+@apu.ac.jp",
+        "correct": false
+      },
+      {
+        "text": "@([a-z]+)",
+        "correct": false
+      },
+      {
+        "text": "\\d{8}",
+        "correct": false
+      }
+    ],
+    "explanation": "The Yahoo pattern fixes @yahoo and then allows word or dot characters after it."
+  },
+  {
+    "id": "q087",
+    "type": "mcq",
+    "title": "Telephone regex",
+    "source": "Lecture 10, slide page 78",
+    "prompt": "Which pattern extracts phone numbers like 070-5540-3900?",
+    "options": [
+      {
+        "text": "\\d{3}-\\d{4}-\\d{4}",
+        "correct": true
+      },
+      {
+        "text": "\\d{8}",
+        "correct": false
+      },
+      {
+        "text": "[a-z]+@[a-z]+",
+        "correct": false
+      },
+      {
+        "text": "\\d{3}.\\d{4}.\\d{4}",
+        "correct": false
+      }
+    ],
+    "explanation": "The phone numbers use three digits, a hyphen, four digits, a hyphen, and four digits."
+  },
+  {
+    "id": "q088",
+    "type": "mcq",
+    "title": "Student number regex",
+    "source": "Lecture 10, slide page 78",
+    "prompt": "Which pattern extracts 8-digit student numbers in the slide?",
+    "options": [
+      {
+        "text": "\\d{8}",
+        "correct": true
+      },
+      {
+        "text": "\\d{3}-\\d{4}-\\d{4}",
+        "correct": false
+      },
+      {
+        "text": "\\w{8}@apu",
+        "correct": false
+      },
+      {
+        "text": "[0-5][0-9]",
+        "correct": false
+      }
+    ],
+    "explanation": "The student numbers shown are exactly eight digits, so \\d{8} matches them."
+  },
+  {
+    "id": "q089",
+    "type": "mcq",
+    "title": "Exception validation numeric-only",
+    "source": "Lecture 10, slide page 80",
+    "prompt": "In the numeric-only validation loop, what causes the loop to break?",
+    "options": [
+      {
+        "text": "int(data) succeeds without raising an exception.",
+        "correct": true
+      },
+      {
+        "text": "The user enters any letters.",
+        "correct": false
+      },
+      {
+        "text": "The user enters a negative sign.",
+        "correct": false
+      },
+      {
+        "text": "The except block runs.",
+        "correct": false
+      }
+    ],
+    "explanation": "The loop tries int(data). If conversion succeeds, break exits the loop; invalid input is caught by except."
+  },
+  {
+    "id": "q090",
+    "type": "mcq",
+    "title": "Anything-but-number validation",
+    "source": "Lecture 10, slide page 80",
+    "prompt": "In the anything-but-number example, which input finally passes?",
+    "options": [
+      {
+        "text": "APU",
+        "correct": true
+      },
+      {
+        "text": "45",
+        "correct": false
+      },
+      {
+        "text": "100",
+        "correct": false
+      },
+      {
+        "text": "-34",
+        "correct": false
+      }
+    ],
+    "explanation": "The script rejects values that can be converted to int; APU triggers the except branch and is accepted."
+  },
+  {
+    "id": "q091",
+    "type": "mcq",
+    "title": "Single uppercase validation",
+    "source": "Lecture 10, slide page 81",
+    "prompt": "In the single-character uppercase validation, which input is accepted?",
+    "options": [
+      {
+        "text": "A",
+        "correct": true
+      },
+      {
+        "text": "a",
+        "correct": false
+      },
+      {
+        "text": "AB",
+        "correct": false
+      },
+      {
+        "text": "12",
+        "correct": false
+      }
+    ],
+    "explanation": "The single-character method checks whether the whole input is one of the uppercase letters in the valid tuple."
+  },
+  {
+    "id": "q092",
+    "type": "mcq",
+    "title": "Multiple uppercase validation",
+    "source": "Lecture 10, slide page 81",
+    "prompt": "Why does the multiple-character validation loop use a flag?",
+    "options": [
+      {
+        "text": "To remember whether any character in the input was invalid.",
+        "correct": true
+      },
+      {
+        "text": "To count the number of regex matches.",
+        "correct": false
+      },
+      {
+        "text": "To open a Tkinter window.",
+        "correct": false
+      },
+      {
+        "text": "To choose a pip version.",
+        "correct": false
+      }
+    ],
+    "explanation": "The loop checks each character. If any item is invalid, flag becomes 1 and the whole string is rejected."
+  },
+  {
+    "id": "q093",
+    "type": "mcq",
+    "title": "Reject invalid characters",
+    "source": "Lecture 10, slide page 82",
+    "prompt": "In the invalid-character slide, why is ABC# rejected?",
+    "options": [
+      {
+        "text": "# is in the invalid-character tuple.",
+        "correct": true
+      },
+      {
+        "text": "Uppercase letters are never allowed.",
+        "correct": false
+      },
+      {
+        "text": "The string has more than one character.",
+        "correct": false
+      },
+      {
+        "text": "The regex package is missing.",
+        "correct": false
+      }
+    ],
+    "explanation": "The multiple-character version rejects the whole string if any character appears in the invalid tuple."
+  },
+  {
+    "id": "q094",
+    "type": "mcq",
+    "title": "Regex validation",
+    "source": "Lecture 10, slide page 83",
+    "prompt": "In the lecture's email and phone validators, why is re.search(...) useful inside an if statement?",
+    "options": [
+      {
+        "text": "It returns a truthy Match object when the pattern is found and None when not found.",
+        "correct": true
+      },
+      {
+        "text": "It always returns True.",
+        "correct": false
+      },
+      {
+        "text": "It automatically fixes invalid data.",
+        "correct": false
+      },
+      {
+        "text": "It installs the re module.",
+        "correct": false
+      }
+    ],
+    "explanation": "The validation loop accepts input when the search returns a match; otherwise it asks the user to try again."
+  },
+  {
+    "id": "q095",
+    "type": "mcq",
+    "title": "Phone validator",
+    "source": "Lecture 10, slide page 83",
+    "prompt": "Which input matches the lecture's phone pattern?<pre class=\"code-console\" aria-label=\"code snippet\"><code>regex_phone = r&quot;^0[789]0-\\d{4}-\\d{4}$&quot;</code></pre>",
+    "options": [
+      {
+        "text": "080-4444-6666",
+        "correct": true
+      },
+      {
+        "text": "1122334445",
+        "correct": false
+      },
+      {
+        "text": "04011221122",
+        "correct": false
+      },
+      {
+        "text": "090-ABC-5055",
+        "correct": false
+      }
+    ],
+    "explanation": "The pattern requires 070, 080, or 090 style prefix, then hyphen-four digits-hyphen-four digits."
+  },
+  {
+    "id": "q096",
+    "type": "matching",
+    "title": "Core regex metacharacters",
+    "source": "Lecture 10, slide page 89",
+    "prompt": "Match each metacharacter to the lecture table meaning.",
+    "pairs": [
+      {
+        "left": ".",
+        "right": "Any character except newline."
+      },
+      {
+        "left": "^",
+        "right": "Starts with."
+      },
+      {
+        "left": "$",
+        "right": "Ends with."
+      },
+      {
+        "left": "*",
+        "right": "Zero or more occurrences."
+      },
+      {
+        "left": "+",
+        "right": "One or more occurrences."
+      }
+    ],
+    "explanation": "These definitions come from the metacharacter table."
+  },
+  {
+    "id": "q097",
+    "type": "matching",
+    "title": "Regex special sequences",
+    "source": "Lecture 10, slide page 90",
+    "prompt": "Match each special sequence to its meaning.",
+    "pairs": [
+      {
+        "left": "\\A",
+        "right": "Beginning of the string."
+      },
+      {
+        "left": "\\d",
+        "right": "A digit from 0 to 9."
+      },
+      {
+        "left": "\\D",
+        "right": "A non-digit."
+      },
+      {
+        "left": "\\s",
+        "right": "A whitespace character."
+      },
+      {
+        "left": "\\w",
+        "right": "A word character: letters, digits, or underscore."
+      }
+    ],
+    "explanation": "The slide lists these special sequences and examples."
+  },
+  {
+    "id": "q098",
+    "type": "matching",
+    "title": "Regex sets",
+    "source": "Lecture 10, slide page 91",
+    "prompt": "Match each set pattern to the lecture table meaning.",
+    "pairs": [
+      {
+        "left": "[arn]",
+        "right": "One of a, r, or n is present."
+      },
+      {
+        "left": "[a-n]",
+        "right": "Any lowercase character between a and n."
+      },
+      {
+        "left": "[^arn]",
+        "right": "Any character except a, r, or n."
+      },
+      {
+        "left": "[0-5][0-9]",
+        "right": "Any two-digit number from 00 to 59."
+      },
+      {
+        "left": "[+]",
+        "right": "A literal plus character."
+      }
+    ],
+    "explanation": "Set patterns inside square brackets define allowed characters or ranges; many metacharacters lose special meaning inside sets."
+  },
+  {
+    "id": "q099",
+    "type": "mcq",
+    "title": "Lecture revision advice",
+    "source": "Lecture 10, slide page 87",
+    "prompt": "What does the Lecture 10 homework slide recommend before the next class?",
+    "options": [
+      {
+        "text": "Revise this lecture note and read the next lecture note.",
+        "correct": true
+      },
+      {
+        "text": "Delete the regex examples.",
+        "correct": false
+      },
+      {
+        "text": "Use both pack and grid together.",
+        "correct": false
+      },
+      {
+        "text": "Stop using raw strings.",
+        "correct": false
+      }
+    ],
+    "explanation": "Like the other homework slides, it asks students to revise the current lecture and read the next lecture note."
+  }
+];
+let order = [], pos = 0, score = 0, round = 1, answered = false;
+let states = {};
+const QUIZ_SECONDS = 150 * 60;
+let activeQuizSeconds = QUIZ_SECONDS;
+let remainingSeconds = activeQuizSeconds;
+let timerHandle = null;
+let attemptSubmitted = false;
+let currentAttemptRecord = null;
+let navigationGuardActive = false;
+let guardToastTimer = null;
+let attemptDeadlineTs = null;
+let restoringActiveAttempt = false;
+let practiceMode = false;
+let dragState = { selected:null, placements:{} };
+let currentDD = null;
+let ddDrag = null;
+let suppressDDClick = false;
+const STORE_PREFIX = 'python_lectures_8_10_quiz_99q_v1_';
+const elCard = document.getElementById('card'), elQIdx = document.getElementById('qIdx'), elQTotal = document.getElementById('qTotal'), elScore = document.getElementById('score'), elRound = document.getElementById('round'), elBest = document.getElementById('best'), elCompleted = document.getElementById('completed'), elProg = document.getElementById('progress'), elJump = document.getElementById('jump'), elQuizBar = document.getElementById('quizBar'), elProgressTrack = document.getElementById('progressTrack'), elTimer = document.getElementById('timer'), elTimerPill = document.getElementById('timerPill');
+elQTotal.textContent = BANK.length;
+function shuffle(arr) { const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function cloneData(value) { return JSON.parse(JSON.stringify(value)); }
+function questionState(item) { if(!states[item.id]) states[item.id]={answered:false, correct:false}; return states[item.id]; }
+function optionOrderFor(item, choices) { const st=questionState(item); if(!Array.isArray(st.optionOrder) || st.optionOrder.length!==choices.length) st.optionOrder=shuffle(choices.map((_,i)=>i)); return st.optionOrder; }
+function escapeHTML(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function norm(s) { return String(s||'').toLowerCase().replace(/[.,;:!?()[\]{}"']/g,'').replace(/[-‐‑‒–—]/g,' ').replace(/\s+/g,' ').trim(); }
+function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
+function lsSet(k,v) { try { localStorage.setItem(k,v); } catch(e) {} }
+function lsDel(k) { try { localStorage.removeItem(k); } catch(e) {} }
+
+function showGuardToast(message='Quiz attempt protected. Finish or submit this attempt first.') {
+  let toast = document.getElementById('guardToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'guardToast';
+    toast.className = 'guard-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('show');
+  if(guardToastTimer) clearTimeout(guardToastTimer);
+  guardToastTimer = setTimeout(()=>toast.classList.remove('show'), 2200);
+}
+function pushGuardState() {
+  try { history.pushState({quizAttemptGuard:true, t:Date.now()}, '', location.href); } catch(e) {}
+}
+function enableNavigationGuard() {
+  navigationGuardActive = true;
+  pushGuardState();
+  pushGuardState();
+}
+function disableNavigationGuard() {
+  navigationGuardActive = false;
+}
+function getActiveAttempt() {
+  try { return JSON.parse(lsGet(STORE_PREFIX+'activeAttempt') || 'null'); } catch(e) { return null; }
+}
+function saveActiveAttempt() {
+  if(!navigationGuardActive || attemptSubmitted || !order.length) return;
+  const active = {
+    active:true,
+    order:order.slice(),
+    pos,
+    score,
+    round,
+    states,
+    remainingSeconds:Math.max(0, remainingSeconds),
+    deadlineTs:attemptDeadlineTs,
+    timerSeconds:activeQuizSeconds,
+    savedAt:Date.now()
+  };
+  lsSet(STORE_PREFIX+'activeAttempt', JSON.stringify(active));
+}
+function clearActiveAttempt() { lsDel(STORE_PREFIX+'activeAttempt'); }
+window.addEventListener('beforeunload', function(e) {
+  if(navigationGuardActive && !attemptSubmitted){
+    saveActiveAttempt();
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  }
+});
+window.addEventListener('pagehide', function() {
+  if(navigationGuardActive && !attemptSubmitted) saveActiveAttempt();
+});
+window.addEventListener('popstate', function(e) {
+  if(navigationGuardActive && !attemptSubmitted){
+    pushGuardState();
+    window.setTimeout(pushGuardState, 0);
+    showGuardToast('Back/forward is blocked during this active quiz attempt.');
+    saveActiveAttempt();
+  }
+});
+function getAttemptHistory() { try { return JSON.parse(lsGet(STORE_PREFIX+'history') || '[]'); } catch(e) { return []; } }
+function saveAttemptHistory(arr) { lsSet(STORE_PREFIX+'history', JSON.stringify(arr)); }
+function getCompleted() { const history = getAttemptHistory(); if(history.length) return history.length; return parseInt(lsGet(STORE_PREFIX+'completed') || '0', 10); }
+function appendAttemptRecord(record) { const history = getAttemptHistory(); history.push(record); saveAttemptHistory(history); lsSet(STORE_PREFIX+'completed', String(history.length)); return history.length; }
+function formatAttemptDate(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString([], {year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+  } catch(e) { return 'saved attempt'; }
+}
+function renderAttemptHistoryList(history) {
+  if(!history.length) return '';
+  const rows = history.map((a,i)=>{
+    const pct = Math.round((a.score / a.total) * 100);
+    const label = a.timeExpired ? 'auto-submitted, time up' : 'submitted';
+    const wrongCount = Array.isArray(a.wrongIds) ? a.wrongIds.length : Math.max(0, (a.total || 0) - (a.score || 0));
+    return `<li><span><strong>Attempt ${i+1}</strong><br><span class="attempt-meta">${escapeHTML(formatAttemptDate(a.submittedAt))} · ${label} · wrong marks: ${wrongCount}</span></span><span class="attempt-score">${a.score} / ${a.total} · ${pct}%</span></li>`;
+  }).join('');
+  return `<section class="attempt-history"><h3>Previous attempts</h3><ol class="attempt-list">${rows}</ol></section>`;
+}
+function updateSavedStats() { elBest.textContent = lsGet(STORE_PREFIX+'best') || '—'; elCompleted.textContent = String(getCompleted()); }
+function formatTime(seconds) { const m=Math.floor(seconds/60); const s=seconds%60; return `${m}:${String(s).padStart(2,'0')}`; }
+function mixRGB(a,b,t){ const m=(x,y)=>Math.round(x+(y-x)*t); return `rgb(${m(a[0],b[0])}, ${m(a[1],b[1])}, ${m(a[2],b[2])})`; }
+function updateTimerDisplay() {
+  const safeSeconds = Math.max(0, remainingSeconds);
+  elTimer.textContent = formatTime(safeSeconds);
+  elTimerPill.style.setProperty('--timer-progress', String(safeSeconds / activeQuizSeconds));
+  elTimerPill.classList.remove('warning','urgent');
+  elTimerPill.style.background='';
+  elTimerPill.style.borderColor='';
+  elTimerPill.style.color='';
+  if (safeSeconds <= 10) {
+    const t = (10 - safeSeconds) / 10;
+    elTimerPill.classList.add('urgent');
+    elTimerPill.style.background = mixRGB([255, 205, 205], [236, 169, 169], t);
+    elTimerPill.style.borderColor = mixRGB([255, 95, 95], [204, 0, 0], t);
+    elTimerPill.style.color = mixRGB([255, 40, 40], [170, 0, 0], t);
+  } else if (safeSeconds <= 60) {
+    elTimerPill.classList.add('warning');
+  }
+}
+function stopTimer() { if(timerHandle){ clearInterval(timerHandle); timerHandle=null; } elTimerPill.classList.remove('running'); }
+function syncRemainingFromDeadline() {
+  if(attemptDeadlineTs){
+    remainingSeconds = Math.max(0, Math.ceil((attemptDeadlineTs - Date.now()) / 1000));
+  }
+}
+function startTimer(reset=true) {
+  stopTimer();
+  elTimerPill.style.setProperty('--timer-duration', activeQuizSeconds + 's');
+  if(reset || !attemptDeadlineTs){
+    remainingSeconds = activeQuizSeconds;
+    attemptDeadlineTs = Date.now() + activeQuizSeconds * 1000;
+  } else {
+    syncRemainingFromDeadline();
+  }
+  updateTimerDisplay();
+  elTimerPill.classList.remove('running');
+  void elTimerPill.offsetWidth;
+  elTimerPill.classList.add('running');
+  timerHandle = setInterval(()=>{
+    syncRemainingFromDeadline();
+    updateTimerDisplay();
+    saveActiveAttempt();
+    if(remainingSeconds <= 0){ stopTimer(); submitAttempt(true); }
+  }, 1000);
+}
+function setQuizChrome(show) { elQuizBar.classList.toggle('hidden', !show); elJump.classList.toggle('hidden', !show); elProgressTrack.classList.toggle('hidden', !show); }
+function showOpening(message='') {
+  disableNavigationGuard();
+  clearActiveAttempt();
+  stopTimer();
+  practiceMode = false;
+  activeQuizSeconds = QUIZ_SECONDS;
+  attemptDeadlineTs = null;
+  remainingSeconds = activeQuizSeconds;
+  updateTimerDisplay();
+  attemptSubmitted = false;
+  currentAttemptRecord = null;
+  setQuizChrome(false);
+  updateSavedStats();
+  elQTotal.textContent = BANK.length;
+  if(!BANK.length){
+    elCard.innerHTML = `<div class="opening"><h2>Template ready</h2><p>This file is the quiz shell. Give it to another AI together with new slides/readings and ask it to replace the <code>BANK</code> array plus metadata using the instructions embedded at the top of the file.</p><div class="attempt-badge">No active questions loaded yet</div></div>`;
+    return;
+  }
+  const history = getAttemptHistory();
+  const historyList = renderAttemptHistoryList(history);
+  const practiceButton = history.length ? `<button class="btn ghost" onclick="startIncorrectPractice()">Practice only the incorrect questions again</button>` : '';
+  const messageBox = message ? `<div id="openingMsg" class="feedback info practice-message" style="display:block">${escapeHTML(message)}</div>` : `<div id="openingMsg" class="practice-message"></div>`;
+  elCard.innerHTML = `<div class="opening"><h2>Slide-Sourced Python Quiz Run</h2><p>This set covers the instructional content from Lecture 8 (lambda functions and recursion, plus function foundations), Lecture 9 (modules, pip, PyPI, and Tkinter), and Lecture 10 (data validation and regular expressions). Every item names its lecture slide page so missed questions point back to the merged PDF.</p><div class="attempt-badge">Completed attempts: <span id="openingCompleted">${getCompleted()}</span></div>${historyList}<div class="opening-actions"><button class="btn" onclick="startRound()">Start 150-minute quiz</button>${practiceButton}</div>${messageBox}</div>`;
+}
+
+function getLatestWrongQuestionIds() {
+  const history = getAttemptHistory();
+  if(!history.length) return [];
+  const latest = history[history.length - 1];
+  return Array.isArray(latest.wrongIds) ? latest.wrongIds : [];
+}
+function showOpeningMessage(message, type='info') {
+  const box = document.getElementById('openingMsg');
+  if(box){
+    box.className = `feedback ${type} practice-message`;
+    box.style.display = 'block';
+    box.textContent = message;
+  } else {
+    showOpening(message);
+  }
+}
+function startIncorrectPractice() {
+  const wrongIds = getLatestWrongQuestionIds();
+  if(!wrongIds.length){
+    showOpeningMessage("You've got no wrong mark!", 'good');
+    return;
+  }
+  const wrongIndexes = wrongIds.map(id => BANK.findIndex(q => q.id === id)).filter(i => i >= 0);
+  if(!wrongIndexes.length){
+    showOpeningMessage("You've got no wrong mark!", 'good');
+    return;
+  }
+  disableNavigationGuard();
+  clearActiveAttempt();
+  stopTimer();
+  practiceMode = true;
+  activeQuizSeconds = QUIZ_SECONDS;
+  attemptSubmitted = false;
+  currentAttemptRecord = null;
+  order = shuffle(wrongIndexes);
+  pos = 0;
+  score = 0;
+  states = {};
+  elScore.textContent = '0';
+  updateSavedStats();
+  setQuizChrome(true);
+  elQuizBar.classList.add('hidden');
+  renderJump();
+  renderQuestion();
+}
+
+function startRound() {
+  practiceMode = false;
+  activeQuizSeconds = QUIZ_SECONDS;
+  setQuizChrome(true);
+  order = shuffle(BANK.map((_,i)=>i));
+  pos=0;
+  score=0;
+  states={};
+  attemptSubmitted=false;
+  currentAttemptRecord=null;
+  round=getCompleted()+1;
+  elScore.textContent='0';
+  elRound.textContent=round;
+  updateSavedStats();
+  enableNavigationGuard();
+  startTimer(true);
+  saveActiveAttempt();
+  renderJump();
+  renderQuestion();
+}
+function restoreActiveAttempt(active) {
+  restoringActiveAttempt = true;
+  setQuizChrome(true);
+  practiceMode = false;
+  activeQuizSeconds = active.timerSeconds || QUIZ_SECONDS;
+  order = Array.isArray(active.order) && active.order.length ? active.order : shuffle(BANK.map((_,i)=>i));
+  pos = Number.isInteger(active.pos) ? Math.max(0, Math.min(active.pos, order.length-1)) : 0;
+  states = active.states || {};
+  score = Object.values(states).filter(s=>s.answered&&s.correct).length;
+  round = active.round || (getCompleted()+1);
+  attemptSubmitted = false;
+  currentAttemptRecord = null;
+  attemptDeadlineTs = active.deadlineTs || (Date.now() + Math.max(0, active.remainingSeconds || activeQuizSeconds) * 1000);
+  syncRemainingFromDeadline();
+  elScore.textContent=score;
+  elRound.textContent=round;
+  updateSavedStats();
+  enableNavigationGuard();
+  startTimer(false);
+  renderJump();
+  renderQuestion();
+  showGuardToast('Your ongoing attempt was restored and protected.');
+  restoringActiveAttempt = false;
+  if(remainingSeconds <= 0) submitAttempt(true);
+}
+function bootQuiz() {
+  const active = getActiveAttempt();
+  if(active && active.active && !active.submitted && Array.isArray(active.order) && active.order.length){
+    restoreActiveAttempt(active);
+  } else {
+    showOpening();
+  }
+}
+function renderJump() { elJump.innerHTML=''; order.forEach((qi,i)=>{ const q=BANK[qi]; const st=states[q.id]; const b=document.createElement('button'); b.textContent=i+1; b.className=(i===pos?'current ':'')+(st?.answered?(st.correct?'done':'miss'):''); b.onclick=()=>{pos=i; saveActiveAttempt(); renderQuestion();}; elJump.appendChild(b); }); }
+function currentQ() { return BANK[order[pos]]; }
+function lockedState(item){ return states[item.id]?.answered ? states[item.id] : null; }
+function lockNotice(item){ const st=states[item.id]; if(!st?.answered) return; feedback((st.correct?'Correct. ':'Locked. ')+item.explanation, st.correct?'good':(st.revealed?'info':'bad')); }
+
+function highlightPythonCode(root=document) {
+  const keywords = new Set(['False','None','True','and','as','assert','break','class','continue','def','del','elif','else','except','finally','for','from','global','if','import','in','is','lambda','nonlocal','not','or','pass','raise','return','try','while','with','yield']);
+  const builtins = new Set(['abs','bool','dict','float','input','int','len','list','max','min','print','range','reversed','round','set','str','sum','tuple','type']);
+  const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const wrap = (cls, text) => `<span class="${cls}">${esc(text)}</span>`;
+  function readString(text, start) {
+    let i = start;
+    const quote = text[i];
+    const triple = text.slice(i, i + 3) === quote.repeat(3);
+    i += triple ? 3 : 1;
+    while (i < text.length) {
+      if (!triple && text[i] === '\\') {
+        i += 2;
+      } else if (triple && text.slice(i, i + 3) === quote.repeat(3)) {
+        i += 3;
+        break;
+      } else if (!triple && text[i] === quote) {
+        i++;
+        break;
+      } else {
+        i++;
+      }
+    }
+    return i;
+  }
+  function classifyName(text, word, end) {
+    let j = end;
+    while (/\s/.test(text[j] || '')) j++;
+    if (keywords.has(word)) return 'tok-kw';
+    if (builtins.has(word) || text[j] === '(') return 'tok-fn';
+    return 'tok-id';
+  }
+  function highlightText(text) {
+    let out = '';
+    let i = 0;
+    while (i < text.length) {
+      const ch = text[i];
+      if (ch === '#') {
+        const j = text.indexOf('\n', i);
+        const end = j === -1 ? text.length : j;
+        out += wrap('tok-comment', text.slice(i, end));
+        i = end;
+      } else if ((ch === 'r' || ch === 'R' || ch === 'f' || ch === 'F' || ch === 'b' || ch === 'B') && (text[i + 1] === '"' || text[i + 1] === "'")) {
+        const end = readString(text, i + 1);
+        out += wrap('tok-str', text.slice(i, end));
+        i = end;
+      } else if ((ch === '"' || ch === "'")) {
+        const end = readString(text, i);
+        out += wrap('tok-str', text.slice(i, end));
+        i = end;
+      } else if (/[0-9]/.test(ch)) {
+        const m = text.slice(i).match(/^\d+(?:\.\d+)?/)[0];
+        out += wrap('tok-num', m);
+        i += m.length;
+      } else if (/[A-Za-z_]/.test(ch)) {
+        const m = text.slice(i).match(/^[A-Za-z_][A-Za-z0-9_]*/)[0];
+        out += wrap(classifyName(text, m, i + m.length), m);
+        i += m.length;
+      } else if ('()[]{}'.includes(ch)) {
+        out += wrap('tok-br', ch);
+        i++;
+      } else if ('+-*/%=!<>&|^~:.,'.includes(ch)) {
+        out += wrap('tok-op', ch);
+        i++;
+      } else {
+        out += esc(ch);
+        i++;
+      }
+    }
+    return out;
+  }
+  root.querySelectorAll('.code-console code').forEach(code => {
+    if (code.dataset.highlighted === 'true') return;
+    code.innerHTML = highlightText(code.textContent);
+    code.dataset.highlighted = 'true';
+  });
+}
+
+function renderQuestion() {
+  if(pos>=order.length) return renderResult();
+  dragState={selected:null,placements:{}}; currentDD=null;
+  const item=currentQ();
+  answered=!!states[item.id]?.answered;
+  elQIdx.textContent=pos+1; elQTotal.textContent=order.length; elProg.style.width=(pos/order.length*100)+'%';
+  const tagMap={mcq:'Multiple Choice',matching:'Dropdown Match',sequence:'Drag & Order',fill:'Fill In'};
+  let html=`<div class="qnum">Question ${pos+1} of ${order.length}<span class="qtype-tag">${tagMap[item.type]}</span></div><div class="qtext">${item.prompt}</div><div class="source">${escapeHTML(item.source)} · ${escapeHTML(item.title)}</div>`;
+  if(item.type==='mcq') html+=renderMC_HTML(item); else if(item.type==='fill') html+=renderFill_HTML(item); else if(item.type==='matching') html+=renderSelectMatch_HTML(item); else html+=renderDD_HTML(item);
+  const resetControl = '';
+  const rightControls = practiceMode
+    ? `<button class="btn ghost" onclick="showOpening()">Return to opening page</button>`
+    : `<button class="btn" onclick="submitAttempt()">Submit</button>`;
+  html += `<div class="feedback" id="fb"></div><div class="actions submit-row" id="acts"><div><button class="btn ghost arrow" onclick="prevQ()" aria-label="Previous question" title="Previous question">←</button> <button class="btn ghost arrow" onclick="nextQ()" aria-label="Next question" title="Next question">→</button>${resetControl}${item.type==='matching'?'':` <button class="btn ghost" onclick="showAnswer()" ${answered?'disabled':''}>Show answer</button>`}</div><div>${rightControls}</div></div>`;
+  elCard.innerHTML=html;
+  highlightPythonCode(elCard);
+  if(item.type==='mcq') attachMC(item); else if(item.type==='fill') attachFill(item); else if(item.type==='matching') attachSelectMatch(item); else attachDD(item);
+  lockNotice(item);
+  renderJump();
+  saveActiveAttempt();
+}
+function renderMC_HTML(item) {
+  const idxs=optionOrderFor(item, item.options);
+  item._shuf=idxs;
+  return `<div class="options">${idxs.map((orig,i)=>`<button class="opt" data-i="${i}"><span class="marker">${i+1}</span><span class="optText">${escapeHTML(item.options[orig].text)}</span></button>`).join('')}</div><p class="small">Wrong choices are plausible exam traps. Read the wording slowly.</p>`;
+}
+function attachMC(item) {
+  const st=states[item.id];
+  if(st?.answered){
+    document.querySelectorAll('.opt').forEach((b,k)=>{
+      const orig=item._shuf[k];
+      b.disabled=true;
+      if(item.options[orig].correct) b.classList.add('reveal');
+      if(st.selectedOrig===orig) b.classList.add(st.correct?'correct':'wrong');
+    });
+    return;
+  }
+  document.querySelectorAll('.opt').forEach(btn=>{ btn.onclick=()=>{ if(answered)return; answered=true; const shownIndex=+btn.dataset.i; const orig=item._shuf[shownIndex]; const ok=!!item.options[orig].correct; document.querySelectorAll('.opt').forEach((b,k)=>{b.disabled=true; if(item.options[item._shuf[k]].correct)b.classList.add('reveal');}); btn.classList.add(ok?'correct':'wrong'); mark(ok,{selectedOrig:orig, optionOrder:item._shuf.slice()}); feedback((ok?'Correct. ':'Not quite. ')+item.explanation, ok?'good':'bad'); }; });
+}
+function renderFill_HTML(item) { return `<div class="fillbox">${item.sentences.map((s,i)=>`<label class="fill-row">${escapeHTML(s.before)}<input data-fill="${i}" autocomplete="off" autocapitalize="none" spellcheck="false" />${escapeHTML(s.after)}</label>`).join('')}</div><p class="small">Type the missing word or phrase. Correct blanks lock automatically.</p>`; }
+function attachFill(item) {
+  const st=states[item.id];
+  const inputs=[...document.querySelectorAll('input[data-fill]')];
+  if(st?.values){
+    inputs.forEach((inp,i)=>{
+      inp.value = st.values?.[i] || '';
+      if(st.locked?.[i] || st.answered){ inp.classList.add('correct'); inp.disabled=true; }
+    });
+  }
+  if(st?.answered){ return; }
+  inputs.forEach(inp=>{ inp.addEventListener('input', checkFill); });
+}
+function checkFill() {
+  const item=currentQ();
+  if(answered) return;
+  const inputs=[...document.querySelectorAll('input[data-fill]')];
+  const st = states[item.id] || {answered:false, correct:false, values:Array(item.sentences.length).fill(''), locked:Array(item.sentences.length).fill(false)};
+  st.values = st.values || Array(item.sentences.length).fill('');
+  st.locked = st.locked || Array(item.sentences.length).fill(false);
+  let allLocked=true;
+  let allFilled=true;
+  inputs.forEach(inp=>{
+    const idx=+inp.dataset.fill;
+    if(st.locked[idx]){ inp.disabled=true; inp.classList.add('correct'); return; }
+    st.values[idx]=inp.value;
+    const s=item.sentences[idx];
+    const ok=s.answers.some(a=>norm(a)===norm(inp.value));
+    if(ok){
+      st.locked[idx]=true;
+      inp.classList.add('correct');
+      inp.disabled=true;
+    } else {
+      inp.classList.remove('correct');
+    }
+    if(!st.locked[idx]) allLocked=false;
+    if(!inp.value.trim()) allFilled=false;
+  });
+  states[item.id]=st;
+  saveActiveAttempt();
+  if(st.locked.every(Boolean)){
+    answered=true;
+    mark(true,{values:st.values.slice(), locked:st.locked.slice()});
+    feedback('Correct. '+item.explanation,'good');
+  } else if(allFilled){
+    feedback('Keep going. Correct blanks lock green immediately; remaining blanks still need revision.','info');
+  }
+}
+
+function renderSelectMatch_HTML(item) {
+  const st=questionState(item);
+  const optionOrder = optionOrderFor(item, item.pairs);
+  item._matchOptions = optionOrder;
+  return `<div class="dd-hint">🌿 Choose the correct definition from each dropdown. When every row has a choice, press Check answers.</div><div class="select-match">${item.pairs.map((p,i)=>`<div class="select-row" data-row="${i}"><div class="select-term">${escapeHTML(p.left)}</div><select data-match="${i}"><option value="">Choose the best match...</option>${optionOrder.map(idx=>`<option value="${idx}">${escapeHTML(item.pairs[idx].right)}</option>`).join('')}</select></div>`).join('')}</div><div class="select-actions"><button class="btn" onclick="checkSelectMatch()" ${st?.answered?'disabled':''}>Check answers</button><button class="btn ghost" onclick="showAnswer()" ${st?.answered?'disabled':''}>Show answer</button></div><p class="small">No dragging now: term on the left, definition dropdown on the right. Tiny exam dojo, less finger acrobatics 🥢.</p>`;
+}
+function attachSelectMatch(item) {
+  const st=states[item.id];
+  const selects=[...document.querySelectorAll('select[data-match]')];
+  if(st?.answered){
+    selects.forEach(sel=>{
+      const termIndex=+sel.dataset.match;
+      sel.value=String(st.values?.[termIndex] ?? (st.revealed ? termIndex : ''));
+      sel.disabled=true;
+      const ok=st.rowResults?.[termIndex] ?? (st.revealed ? true : false);
+      sel.closest('.select-row').classList.add(ok?'correct':'wrong');
+    });
+    return;
+  }
+  selects.forEach(sel=>{
+    sel.addEventListener('change',()=>{
+      if(answered) return;
+      const allChosen=[...document.querySelectorAll('select[data-match]')].every(s=>s.value!=='');
+      if(allChosen) feedback('All rows have choices. Press Check answers to grade this set.','info');
+    });
+  });
+}
+function checkSelectMatch() {
+  const item=currentQ();
+  if(answered || item.type!=='matching') return;
+  const selects=[...document.querySelectorAll('select[data-match]')];
+  const allChosen=selects.every(s=>s.value!=='');
+  if(!allChosen){ feedback('Choose one definition for every term first.','info'); return; }
+  let allCorrect=true;
+  const values=[];
+  const rowResults=[];
+  selects.forEach(sel=>{
+    const row=sel.closest('.select-row');
+    const termIndex=+sel.dataset.match;
+    const chosenIndex=+sel.value;
+    const ok=termIndex===chosenIndex;
+    values[termIndex]=chosenIndex;
+    rowResults[termIndex]=ok;
+    row.classList.add(ok?'correct':'wrong');
+    if(!ok) allCorrect=false;
+    sel.disabled=true;
+  });
+  answered=true;
+  mark(allCorrect,{values, rowResults, optionOrder:item._matchOptions.slice()});
+  feedback((allCorrect?'Correct. ':'Not quite. ')+item.explanation, allCorrect?'good':'bad');
+}
+function setupDD(item) {
+  const st=questionState(item);
+  if(st?.ddSetup) return cloneData(st.ddSetup);
+  let cards, slots, slotOrder;
+  if(item.type==='matching'){
+    cards=item.pairs.map((p,i)=>({id:'c'+i,text:p.right,correctSlot:'s'+i})); slots=item.pairs.map((p,i)=>({id:'s'+i,label:p.left,multi:false})); slotOrder=shuffle(slots.map(s=>s.id));
+  } else {
+    cards=item.items.map((t,i)=>({id:'c'+i,text:t,correctSlot:'s'+i})); slots=item.items.map((_,i)=>({id:'s'+i,label:String(i+1),multi:false})); slotOrder=slots.map(s=>s.id);
+  }
+  const setup = {cards,slots,slotOrder,cardOrder:shuffle(cards.map(c=>c.id)),type:item.type};
+  st.ddSetup = cloneData(setup);
+  return setup;
+}
+function renderDD_HTML(item) {
+  currentDD=setupDD(item);
+  const st=states[item.id];
+  if(st?.placements) dragState.placements={...st.placements};
+  const hint=item.type==='matching'
+    ? 'Drag a card into its matching slot. Drop a placed card back into Cards to remove it.'
+    : 'Drag a card into the correct numbered slot. Drop a placed card back into Cards to remove it.';
+  return `<div class="dd-hint">${hint}</div><div id="ddArea"></div>`;
+}
+function attachDD(item) {
+  renderDDArea(item);
+  const st=states[item.id];
+  if(st?.answered){
+    renderDDFeedback(st.rowResults || {});
+    document.querySelectorAll('.dd-card').forEach(card=>card.disabled=true);
+  }
+}
+function renderDDArea(item) {
+  const area=document.getElementById('ddArea');
+  let h='';
+  if(currentDD.type==='matching') h+=renderMatchSlots(); else h+=renderOrderSlots();
+  const inBank=currentDD.cardOrder.filter(cid=>!dragState.placements[cid]);
+  h+=`<div class="card-bank"><div class="card-bank-label">Cards (${inBank.length} left)</div><div class="card-bank-cards" data-bank="true">${inBank.length?inBank.map(cid=>{const c=currentDD.cards.find(x=>x.id===cid); const sel=dragState.selected===cid?' selected':''; return `<button class="dd-card${sel}" data-card="${cid}" draggable="false">${escapeHTML(c.text)}</button>`;}).join(''):'<span class="small">All placed.</span>'}</div></div>`;
+  area.innerHTML=h;
+  area.querySelectorAll('.dd-card').forEach(el=>{
+    el.addEventListener('pointerdown', e=>startCardDrag(e,item,el));
+    el.onclick=e=>{
+      e.stopPropagation();
+      if(suppressDDClick){ suppressDDClick=false; return; }
+      onCardClick(item,el.dataset.card);
+    };
+  });
+  area.querySelectorAll('[data-slot]').forEach(el=>{el.onclick=()=>onSlotClick(item,el.dataset.slot);});
+  autoCheckDD(item,false);
+}
+function renderMatchSlots() { return `<div class="match-list">${currentDD.slotOrder.map(sid=>{const slot=currentDD.slots.find(s=>s.id===sid); return `<div class="match-row"><div class="match-label">${escapeHTML(slot.label)}</div>${slotHTML(sid)}</div>`;}).join('')}</div>`; }
+function renderOrderSlots() { return `<div class="order-list">${currentDD.slotOrder.map(sid=>{const slot=currentDD.slots.find(s=>s.id===sid); return `<div class="order-row"><div class="order-num">${slot.label}</div>${slotHTML(sid)}</div>`;}).join('')}</div>`; }
+function slotHTML(sid) {
+  const cardId=Object.keys(dragState.placements).find(cid=>dragState.placements[cid]===sid);
+  if(cardId){
+    const c=currentDD.cards.find(x=>x.id===cardId);
+    return `<div class="slot-target has-card" data-slot="${sid}"><button class="dd-card" data-card="${cardId}" draggable="false">${escapeHTML(c.text)}</button></div>`;
+  }
+  return `<div class="slot-target" data-slot="${sid}"><span class="placeholder">drop here</span></div>`;
+}
+function onCardClick(item,cardId) {
+  if(answered)return;
+  if(dragState.placements[cardId]){
+    delete dragState.placements[cardId];
+    dragState.selected=null;
+  } else {
+    dragState.selected=(dragState.selected===cardId)?null:cardId;
+  }
+  renderDDArea(item);
+  saveActiveAttempt();
+}
+function onSlotClick(item,slotId) {
+  if(answered||!dragState.selected)return;
+  placeCardInSlot(item, dragState.selected, slotId);
+}
+function placeCardInSlot(item, cardId, slotId) {
+  if(answered)return;
+  Object.keys(dragState.placements).forEach(cid=>{
+    if(cid===cardId || dragState.placements[cid]===slotId) delete dragState.placements[cid];
+  });
+  dragState.placements[cardId]=slotId;
+  dragState.selected=null;
+  renderDDArea(item);
+  saveActiveAttempt();
+}
+function returnCardToBank(item, cardId) {
+  if(answered)return;
+  delete dragState.placements[cardId];
+  dragState.selected=null;
+  renderDDArea(item);
+  saveActiveAttempt();
+}
+function startCardDrag(e,item,el) {
+  if(answered || (e.pointerType==='mouse' && e.button!==0)) return;
+  e.preventDefault();
+  const rect=el.getBoundingClientRect();
+  ddDrag={
+    item,
+    cardId:el.dataset.card,
+    sourceEl:el,
+    pointerId:e.pointerId,
+    startX:e.clientX,
+    startY:e.clientY,
+    offsetX:e.clientX-rect.left,
+    offsetY:e.clientY-rect.top,
+    rect,
+    moved:false,
+    ghost:null
+  };
+  el.classList.add('drag-source');
+  try { el.setPointerCapture(e.pointerId); } catch(err) {}
+  el.addEventListener('pointermove', onCardDragMove);
+  el.addEventListener('pointerup', onCardDragEnd);
+  el.addEventListener('pointercancel', onCardDragCancel);
+}
+function ensureDragGhost() {
+  if(!ddDrag || ddDrag.ghost) return;
+  const ghost=ddDrag.sourceEl.cloneNode(true);
+  ghost.classList.remove('selected','correct','wrong');
+  ghost.classList.add('dd-drag-ghost');
+  ghost.setAttribute('aria-hidden','true');
+  ghost.style.width=ddDrag.rect.width+'px';
+  ghost.style.minHeight=ddDrag.rect.height+'px';
+  document.body.appendChild(ghost);
+  ddDrag.ghost=ghost;
+}
+function onCardDragMove(e) {
+  if(!ddDrag || e.pointerId!==ddDrag.pointerId) return;
+  const dx=e.clientX-ddDrag.startX;
+  const dy=e.clientY-ddDrag.startY;
+  if(!ddDrag.moved && Math.hypot(dx,dy)<4) return;
+  ddDrag.moved=true;
+  ensureDragGhost();
+  ddDrag.ghost.style.setProperty('--drag-x', (e.clientX-ddDrag.offsetX)+'px');
+  ddDrag.ghost.style.setProperty('--drag-y', (e.clientY-ddDrag.offsetY)+'px');
+  setActiveDDDropTarget(findDDDropTarget(e.clientX,e.clientY));
+}
+function onCardDragEnd(e) {
+  if(!ddDrag || e.pointerId!==ddDrag.pointerId) return;
+  e.preventDefault();
+  const drag=ddDrag;
+  const target=drag.moved ? findDDDropTarget(e.clientX,e.clientY) : null;
+  cleanupDDDrag();
+  suppressDDClick=true;
+  window.setTimeout(()=>{ suppressDDClick=false; }, 0);
+  if(!drag.moved){
+    onCardClick(drag.item, drag.cardId);
+  } else if(target?.dataset?.slot){
+    placeCardInSlot(drag.item, drag.cardId, target.dataset.slot);
+  } else if(target?.dataset?.bank!==undefined){
+    returnCardToBank(drag.item, drag.cardId);
+  }
+}
+function onCardDragCancel() {
+  cleanupDDDrag();
+  suppressDDClick=true;
+  window.setTimeout(()=>{ suppressDDClick=false; }, 0);
+}
+function cleanupDDDrag() {
+  if(!ddDrag) return;
+  const el=ddDrag.sourceEl;
+  el.classList.remove('drag-source');
+  el.removeEventListener('pointermove', onCardDragMove);
+  el.removeEventListener('pointerup', onCardDragEnd);
+  el.removeEventListener('pointercancel', onCardDragCancel);
+  if(ddDrag.ghost) ddDrag.ghost.remove();
+  document.querySelectorAll('.drop-active').forEach(node=>node.classList.remove('drop-active'));
+  ddDrag=null;
+}
+function findDDDropTarget(x,y) {
+  const ghost=ddDrag?.ghost;
+  if(ghost) ghost.style.display='none';
+  const el=document.elementFromPoint(x,y);
+  if(ghost) ghost.style.display='';
+  return el?.closest?.('[data-slot], [data-bank]') || null;
+}
+function setActiveDDDropTarget(target) {
+  document.querySelectorAll('.drop-active').forEach(node=>node.classList.remove('drop-active'));
+  if(target) target.classList.add('drop-active');
+}
+function autoCheckDD(item,force) { if(!currentDD||answered)return; const allPlaced=currentDD.cards.every(c=>dragState.placements[c.id]); if(!allPlaced&&!force)return; const results={}; let count=0; currentDD.cards.forEach(c=>{const ok=dragState.placements[c.id]===c.correctSlot; results[c.id]=ok; if(ok)count++;}); const all=count===currentDD.cards.length; if(allPlaced){ answered=true; mark(all,{placements:{...dragState.placements}, rowResults:results, ddSetup:JSON.parse(JSON.stringify(currentDD))}); renderDDFeedback(results); feedback((all?'Correct. ':'Not quite. ')+item.explanation, all?'good':'bad'); } }
+function renderDDFeedback(results) { document.querySelectorAll('.slot-target').forEach(slot=>{ const card=slot.querySelector('.dd-card'); if(card){ const ok=!!results[card.dataset.card]; slot.classList.add(ok?'correct':'wrong'); card.classList.add(ok?'correct':'wrong'); card.disabled=true; } }); }
+function mark(ok, data={}) { const item=currentQ(); states[item.id]={...(states[item.id]||{}), answered:true, correct:ok, ...data}; answered=true; document.querySelectorAll('button[onclick="showAnswer()"]').forEach(btn=>{ btn.disabled=true; btn.setAttribute('aria-disabled','true'); }); score=Object.values(states).filter(s=>s.answered&&s.correct).length; elScore.textContent=score; renderJump(); saveActiveAttempt(); }
+function feedback(msg,type) { const f=document.getElementById('fb'); f.className='feedback '+type; f.textContent=msg; }
+function showAnswer() {
+  const item=currentQ();
+  if(answered) return;
+  if(item.type==='mcq'){
+    document.querySelectorAll('.opt').forEach((b,k)=>{ b.disabled=true; if(item.options[item._shuf[k]].correct)b.classList.add('reveal'); });
+    mark(false,{revealed:true, optionOrder:item._shuf.slice()});
+  } else if(item.type==='fill'){
+    const values=[];
+    document.querySelectorAll('input[data-fill]').forEach(inp=>{ const s=item.sentences[+inp.dataset.fill]; inp.value=s.answers[0]; values[+inp.dataset.fill]=inp.value; inp.classList.add('correct'); inp.disabled=true; });
+    mark(false,{revealed:true, values});
+  } else if(item.type==='matching'){
+    const values=[]; const rowResults=[];
+    document.querySelectorAll('select[data-match]').forEach(sel=>{ const idx=+sel.dataset.match; sel.value=String(idx); values[idx]=idx; rowResults[idx]=true; sel.disabled=true; sel.closest('.select-row').classList.add('correct'); });
+    mark(false,{revealed:true, values, rowResults, optionOrder:item._matchOptions.slice()});
+  } else {
+    currentDD.cards.forEach(c=>dragState.placements[c.id]=c.correctSlot);
+    const results={}; currentDD.cards.forEach(c=>results[c.id]=true);
+    renderDDArea(item);
+    document.querySelectorAll('.slot-target').forEach(slot=>slot.classList.add('correct'));
+    document.querySelectorAll('.dd-card').forEach(card=>{card.classList.add('correct'); card.disabled=true;});
+    mark(false,{revealed:true, placements:{...dragState.placements}, rowResults:results, ddSetup:JSON.parse(JSON.stringify(currentDD))});
+  }
+  answered=true;
+  feedback('Answer shown. This question is now locked for this attempt. '+item.explanation,'info');
+}
+function prevQ() { pos=(pos-1+order.length)%order.length; saveActiveAttempt(); renderQuestion(); }
+function nextQ() { pos=(pos+1)%order.length; saveActiveAttempt(); renderQuestion(); }
+function showSubmittingScreen() {
+  setQuizChrome(false);
+  elCard.innerHTML = `<div class="loading-screen"><div class="loading-panel"><div class="wait-orb"><div class="wait-ring ring-a"></div><div class="wait-ring ring-b"></div><div class="wait-core"></div><div class="wait-dot"></div></div><div class="loading-title">Please wait...</div><div class="loading-sub">Saving this quiz run and preparing your result summary.</div><div class="loading-mini">This will take about 5 seconds.</div></div></div>`;
+}
+function submitAttempt(timeExpired=false) {
+  if(attemptSubmitted) return;
+  attemptSubmitted=true;
+  disableNavigationGuard();
+  saveActiveAttempt();
+  stopTimer();
+  const total=order.length || BANK.length;
+  const answeredCount = Object.values(states).filter(s=>s.answered).length;
+  const wrongIds = order
+    .map(qi => BANK[qi]?.id)
+    .filter(id => states[id]?.answered && !states[id]?.correct);
+  currentAttemptRecord = {
+    submittedAt: new Date().toISOString(),
+    score: score,
+    total: total,
+    answeredCount: answeredCount,
+    timeExpired: !!timeExpired,
+    remainingSeconds: Math.max(0, remainingSeconds),
+    wrongIds: wrongIds
+  };
+  const best=parseInt(lsGet(STORE_PREFIX+'best')||'0',10);
+  if(score>best) lsSet(STORE_PREFIX+'best', String(score));
+  const completed = appendAttemptRecord(currentAttemptRecord);
+  currentAttemptRecord.completedCount = completed;
+  clearActiveAttempt();
+  updateSavedStats();
+  showSubmittingScreen();
+  window.setTimeout(()=>renderResult(false, timeExpired), 5000);
+}
+function renderResult(recordCompletion=false, timeExpired=false) {
+  stopTimer();
+  setQuizChrome(false);
+  elProg.style.width='100%';
+  const attempt = currentAttemptRecord || {
+    score: score,
+    total: order.length || BANK.length,
+    answeredCount: Object.values(states).filter(s=>s.answered).length,
+    timeExpired: !!timeExpired,
+    remainingSeconds: Math.max(0, remainingSeconds),
+    completedCount: getCompleted()
+  };
+  const total=attempt.total;
+  const pct=Math.round((attempt.score/total)*100);
+  const completed=attempt.completedCount || getCompleted();
+  const resultTitle = attempt.timeExpired ? 'Time is up — attempt submitted' : 'Attempt submitted';
+  const timeLine = attempt.timeExpired ? 'The 150-minute timer ended, the quiz was submitted automatically, and the attempt was locked.' : `Time remaining when submitted: <strong>${formatTime(Math.max(0, attempt.remainingSeconds))}</strong>. This attempt has been locked and cannot be edited.`;
+  elCard.innerHTML=`<div class="result"><h2>${resultTitle}</h2><div class="score-big">${attempt.score} / ${total}</div><p>${pct}% correct</p><p class="small">${timeLine}</p><p class="small">Answered questions counted: ${attempt.answeredCount} / ${total}. Completed attempts saved in this browser: <strong>${completed}</strong>.</p><p class="small">This locked attempt will appear on the opening page. It will stay here until you press the return button.</p><p class="small">If there are wrong marks, the opening page can generate an incorrect-question-only practice set from this latest attempt.</p><div class="actions" style="justify-content:center"><button class="btn" onclick="showOpening()">Return to opening page</button></div></div>`;
+}
+bootQuiz();
+</script>
+</body>
+</html>
